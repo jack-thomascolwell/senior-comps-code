@@ -1,0 +1,707 @@
+{% load static %}
+
+<style>
+  @charset "UTF-8";
+  :root {
+    --color-signal: #fab700;
+    --color-accent: var(--color-signal);
+    line-height: 1.4;
+    font-family: sans-serif;
+    font-size: calc(0.6rem + 0.4vw);
+    color: #212121;
+    background: white;
+    font-weight: 300;
+  }
+
+  h1, h2, h3 {
+    font-weight: 900;
+  }
+
+  .input {
+    user-select: none;
+    position: relative;
+    padding-top: 12px;
+  }
+  .input .focus-border {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #4caf50;
+    transition: 0.4s;
+  }
+  .input label {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 12px;
+    color: #aaa;
+    transition: 0.3s;
+    z-index: -1;
+    letter-spacing: 0.5px;
+  }
+  .input input {
+    position: relative;
+    font: 15px/24px monospace;
+    color: #333;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    padding: 2px 0 0 0;
+    border-bottom: 1px solid #ccc;
+    background-color: transparent;
+  }
+  .input input:not(:placeholder-shown), .input input:focus {
+    outline: none;
+  }
+  .input input:not(:placeholder-shown) ~ .focus-border, .input input:focus ~ .focus-border {
+    width: 100%;
+    transition: 0.4s;
+  }
+  .input input:not(:placeholder-shown) ~ label, .input input:focus ~ label {
+    top: 0;
+    font-size: 12px;
+    color: #4caf50;
+    transition: 0.3s;
+  }
+  .input input:not(:placeholder-shown):not(:focus) ~ .focus-border {
+    width: 0;
+    transition: 0.4s;
+  }
+  .input input:not(:placeholder-shown):not(:focus) ~ label {
+    color: #333;
+    transition: 0.3s;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  #calculator {
+    display: grid;
+    box-sizing: border-box;
+    grid-template-rows: 100fr 100fr;
+    grid-template-columns: 100fr;
+    grid-template-areas: "input" "output";
+    width: 100vw;
+    height: 200vh;
+  }
+  #calculator #input {
+    padding: 15px;
+    grid-area: input;
+    display: grid;
+    grid-template-columns: 60fr 40fr;
+    grid-template-rows: 50fr 25fr 25fr;
+    grid-gap: 15px;
+    grid-template-areas: "ligands visualizer" "ligands controls" "ligands calculate";
+  }
+  #calculator #input #visualizer {
+    grid-area: visualizer;
+    width: 100%;
+    height: 100%;
+  }
+  #calculator #input #visualizerControls {
+    grid-area: controls;
+  }
+  #calculator #input #visualizerControls #orbitals {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+  #calculator #input #visualizerControls #orbitals li {
+    user-select: none;
+    border: 1px solid gray;
+    border-radius: 4px;
+    padding: 5px;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  #calculator #input #visualizerControls #orbitals li:hover {
+    background-color: #f2f2f2;
+  }
+  #calculator #input #ligands {
+    padding: 5px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+    grid-area: ligands;
+  }
+  #calculator #input #ligands .heading {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 5px;
+  }
+  #calculator #input #ligands .heading h2 {
+    margin: 0;
+    padding: 5px;
+    font: 32px/40px sans-serif;
+  }
+  #calculator #input #ligands #newLigand {
+    user-select: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+    border: 1px solid gray;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: white;
+    font: 15px/24px monospace;
+    cursor: pointer;
+    width: fit-content;
+    position: relative;
+  }
+  #calculator #input #ligands #newLigand .button {
+    padding: 0px 5px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+  #calculator #input #ligands #newLigand .button:hover {
+    background-color: #f2f2f2;
+  }
+  #calculator #input #ligands #newLigand .dropdown {
+    position: relative;
+    height: 100%;
+    border-left: 1px solid gray;
+    padding: 0px 5px;
+    box-sizing: border-box;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+  #calculator #input #ligands #newLigand .dropdown::after {
+    content: "▾";
+    box-sizing: border-box;
+  }
+  #calculator #input #ligands #newLigand .dropdown:hover {
+    background-color: #f2f2f2;
+  }
+  #calculator #input #ligands #newLigand .menu {
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    border: 1px solid gray;
+    border-radius: 4px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    background-color: white;
+    z-index: 1;
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: calc(100% + 2px);
+    list-style: none;
+  }
+  #calculator #input #ligands #newLigand .menu li {
+    padding: 0px 5px;
+    font: 15px/24px monospace;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #calculator #input #ligands #newLigand .menu li:hover {
+    background-color: #f2f2f2;
+  }
+  #calculator #input #ligands #newLigand.expanded {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  #calculator #input #ligands #newLigand.expanded .menu {
+    display: flex;
+  }
+  #calculator #input #ligands #newLigand.expanded .dropdown {
+    border-bottom-right-radius: 0;
+  }
+  #calculator #input #ligands .ligand {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+    margin-top: 15px;
+    width: 100%;
+  }
+  #calculator #input #ligands .ligand .delete {
+    font: 15px/15px sans-serif;
+    margin-right: 5px;
+    font-weight: bold;
+    margin-left: auto;
+    cursor: pointer;
+  }
+  #calculator #input #ligands .ligand .delete::after {
+    content: "X";
+  }
+  #calculator #input #ligands .ligand .delete:hover {
+    color: #4caf50;
+  }
+  #calculator #input #ligands .ligand .energies {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 2em;
+    width: 14em;
+  }
+  #calculator #input #ligands .ligand .energies input {
+    width: 6em;
+  }
+  #calculator #input #ligands .ligand .position input {
+    width: 3em;
+  }
+  #calculator #output {
+    grid-area: output;
+  }
+  #calculator #calculate {
+    grid-area: calculate;
+  }
+
+  .orderedPair {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+  .orderedPair .input {
+    margin: 0 0.25em;
+  }
+  .orderedPair .separator {
+    position: relative;
+    width: 2ex;
+    font-size: 15px;
+  }
+  .orderedPair .separator::after {
+    content: ",";
+    font: 15px/15px monospace;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+  }
+  .orderedPair .parenthesis {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .orderedPair .parenthesis:first-child::after {
+    content: "(";
+  }
+  .orderedPair .parenthesis::after {
+    margin-top: -1.5px;
+    content: ")";
+    font: 15px/15px monospace;
+    transform: scaleY(3.25);
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>
+<div id="calculator">
+  <div id="input">
+    <div id="ligands">
+      <div class="heading">
+        <h2>Ligands</h2>
+        <label id="newLigand">
+          <div class="button">New Ligand</div>
+          <div id="newLigandDropdown" class="dropdown"></div>
+          <ul class="menu">
+            {% for l in ligands %}
+            <li title="{{l.name}}" data-esigma="{{l.e_sigma}}" data-epi="{{l.e_pi}}">{{l.name}}</li>
+            {% endfor %}
+          </ul>
+        </label>
+      </div>
+      <!--<div class="ligand">
+        <div class="orderedPair position">
+          <span class="parenthesis"></span>
+          <div class="input">
+            <input type="number" placeholder=" " name="x">
+            <label>x</label>
+            <span class="focus-border"></span>
+          </div>
+          <span class="separator"></span>
+          <div class="input">
+            <input type="number" placeholder=" " name="y">
+            <label>y</label>
+            <span class="focus-border"></span>
+          </div>
+          <span class="separator"></span>
+          <div class="input">
+            <input type="number" placeholder=" " name="z">
+            <label>z</label>
+            <span class="focus-border"></span>
+          </div>
+          <span class="parenthesis"></span>
+        </div>
+        <div class="energies">
+          <div class="input">
+            <input type="number" placeholder=" " name="eSigma">
+            <label>e&sigma;</label>
+            <span class="focus-border"></span>
+          </div>
+          <div class="input">
+            <input type="number" placeholder=" " name="ePi">
+            <label>e&pi;</label>
+            <span class="focus-border"></span>
+          </div>
+        </div>
+        <div class="delete"></div>
+      </div>-->
+    </div>
+    <div id="visualizer"></div>
+    <div id="visualizerControls">
+      <ul id="orbitals">
+        <li data-name="dz2">dz<span class="super">2</span></li>
+        <li data-name="dx2-y2">dx<span class="super">2</span>-y<span class="super">2</span></li>
+        <li data-name="dxz">dxz</li>
+        <li data-name="dyz">dyz</li>
+        <li data-name="dxy">dxy</li>
+      </ul>
+    </div>
+    <div id="calculate"></div>
+  </div>
+  <div id="output">
+  </div>
+</div>
+
+<script src="https://unpkg.com/three@0.145/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.145/examples/js/controls/OrbitControls.js"></script>
+
+<script type="module" defer>
+'use strict'
+
+import orbitalPositions from '{{orbitals}}' assert {type: 'json'};
+
+export class Visualizer {
+  #ligands = [];
+  #animationFrame;
+  #orbitals;
+
+  static #ligandColor = new THREE.Color(0x808080);
+  static #orbitalColor = new THREE.Color(0x303050);
+  static #selectedColor = new THREE.Color(0x4040bf);
+
+  static #bondColor(color=Visualizer.#ligandColor) {
+    const newColor = color.clone();
+    newColor.offsetHSL(0,0,0.25);
+    return newColor;
+  }
+
+  constructor(parent=document.body) {
+    this.renderer = new THREE.WebGLRenderer();
+    this.renderer.setSize(parent.getBoundingClientRect().width, parent.getBoundingClientRect().height);
+    parent.appendChild(this.renderer.domElement);
+
+    this.camera = new THREE.PerspectiveCamera(45, parent.getBoundingClientRect().width / parent.getBoundingClientRect().height, 1, 500);
+    this.camera.position.set(2,2,-2);
+    this.camera.lookAt(0,0,0);
+
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.autoRotate = true;
+    this.controls.update();
+
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(1,1,1);
+    const zAxisFix = new THREE.Quaternion();
+    zAxisFix.setFromUnitVectors(new THREE.Vector3(0,0,1), new THREE.Vector3(0,1,0));
+    this.scene.applyQuaternion(zAxisFix);
+
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    this.scene.add(this.ambientLight);
+
+    this.axesHelper = new THREE.AxesHelper(1.5);
+    this.scene.add(this.axesHelper);
+
+    this.#orbitals = new THREE.Group();
+    const orbitalMaterial = new THREE.MeshLambertMaterial({color: Visualizer.#orbitalColor});;
+    orbitalMaterial.transparent = true;
+    orbitalMaterial.opacity = 0.75;
+    const scaleMat = new THREE.Matrix4();
+    scaleMat.makeScale(0.75, 0.75, 0.75);
+    Object.entries(orbitalPositions).forEach(e => {
+      const [name, position] = e;
+      const orbitalGeometry = new THREE.BufferGeometry();
+      orbitalGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(position), 3));
+      orbitalGeometry.computeVertexNormals();
+      const orbitalMesh = new THREE.Mesh(orbitalGeometry, orbitalMaterial);
+      orbitalMesh.name = name;
+      orbitalMesh.applyMatrix4(scaleMat);
+      orbitalMesh.visible = false;
+      this.#orbitals.add(orbitalMesh);
+    });
+    this.scene.add(this.#orbitals);
+
+    //TODO: remove before production
+    window.orbitals = this.#orbitals;
+    window.visualizer = this;
+  }
+
+  set running(run) {
+    if (run) {
+      if (this.#animationFrame === undefined) this.animate();
+    } else {
+      if (this.#animationFrame !== undefined) {
+        window.cancelAnimationFrame(this.#animationFrame);
+        this.#animationFrame = undefined;
+      }
+    }
+  }
+
+  get running() {
+    return (this.#animationFrame !== undefined);
+  }
+
+  set showAxes(show) {
+    this.axesHelper.visible = show;
+  }
+
+  get showAxes() {
+    return this.axesHelper.visible;
+  }
+
+  #createLigandMesh(position=new THREE.Vector3(0,1,0)) {
+    position.normalize();
+    const bondGeometry = new THREE.CapsuleGeometry(0.0625, 1, 12, 12);
+    const ligandGeometry = new THREE.SphereGeometry(0.25, 12, 12);
+    const bondMaterial = new THREE.MeshLambertMaterial({color: Visualizer.#bondColor()});
+    const ligandMaterial = new THREE.MeshLambertMaterial({color: Visualizer.#ligandColor});
+
+    const bond = new THREE.Mesh(bondGeometry, bondMaterial);
+    const ligand = new THREE.Mesh(ligandGeometry, ligandMaterial);
+    bond.name = 'bond';
+    ligand.name = 'ligand';
+    bond.position.set(0,0.5,0);
+    ligand.position.set(0,1,0);
+
+    const group = new THREE.Group();
+    group.add(bond);
+    group.add(ligand);
+
+    const rotation = new THREE.Quaternion();
+    rotation.setFromUnitVectors(new THREE.Vector3(0,1,0), position);
+    group.quaternion.copy(rotation);
+    return group;
+  }
+
+  setLigands(ligands, selected=-1) {
+    this.#ligands.forEach(l => {
+      this.scene.remove(l);
+    });
+    this.#ligands = [];
+
+    for (let i=0; i<ligands.length; i++) {
+      this.#ligands[i] = this.#createLigandMesh(ligands[i]);
+      this.scene.add(this.#ligands[i]);
+    }
+
+    if(selected!=-1 && this.#ligands[selected]) {
+      this.#ligands[selected].children.forEach(m=> {
+        if (m.name == 'ligand') m.material.color = Visualizer.#selectedColor;
+        else m.material.color = Visualizer.#bondColor(Visualizer.#selectedColor);
+      });
+    }
+  }
+
+  showOrbital(name) {
+    this.#orbitals.children.forEach(o => {
+      if (o.name == name) o.visible = true;
+      else o.visible = false;
+    });
+  }
+
+  animate() {
+    this.#animationFrame = window.requestAnimationFrame(this.animate.bind(this));
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+const visualizer = new Visualizer(document.getElementById('visualizer'));
+visualizer.running = true;
+
+parseFragment();
+
+Array.from(document.querySelectorAll('#newLigand .menu li')).forEach(li => {
+  const esigma = li.dataset.esigma || '';
+  const epi = li.dataset.epi || '';
+  li.addEventListener('click', e=> {
+    newLigand(esigma, epi);
+  });
+});
+
+document.querySelector('#newLigand .button').addEventListener('click', e=> {
+  newLigand();
+});
+
+document.getElementById('newLigandDropdown').addEventListener('click', e => {
+  document.getElementById('newLigand').classList.toggle('expanded');
+  e.stopPropagation();
+});
+
+document.body.addEventListener('click', e=> {
+  document.getElementById('newLigand').classList.remove('expanded');
+});
+
+let showingOrbital = '';
+Array.from(document.querySelectorAll('#orbitals li')).forEach(li => {
+  const name = li.dataset.name;
+  if (name) li.addEventListener('click', e=> {
+    if (showingOrbital == name) {
+      visualizer.showOrbital();
+      showingOrbital = '';
+    } else {
+      visualizer.showOrbital(name);
+      showingOrbital = name;
+    }
+  });
+});
+
+function newLigand(eSigma='', ePi='', x='', y='', z='') {
+  const div = document.createElement('div');
+  const parent=document.getElementById('ligands'); //FIXME: refactor to pass as optional parameter
+  div.classList.add('ligand');
+  div.innerHTML = `
+    <div class="orderedPair position">
+      <span class="parenthesis"></span>
+      <div class="input">
+        <input type="number" placeholder=" " name="x" value="${x}">
+        <label>x</label>
+        <span class="focus-border"></span>
+      </div>
+      <span class="separator"></span>
+      <div class="input">
+        <input type="number" placeholder=" " name="y" value="${y}">
+        <label>y</label>
+        <span class="focus-border"></span>
+      </div>
+      <span class="separator"></span>
+      <div class="input">
+        <input type="number" placeholder=" " name="z" value="${z}">
+        <label>z</label>
+        <span class="focus-border"></span>
+      </div>
+      <span class="parenthesis"></span>
+    </div>
+    <div class="energies">
+      <div class="input">
+        <input type="number" placeholder=" " name="eSigma" value="${eSigma}">
+        <label>e&sigma;</label>
+        <span class="focus-border"></span>
+      </div>
+      <div class="input">
+        <input type="number" placeholder=" " name="ePi" value="${ePi}">
+        <label>e&pi;</label>
+        <span class="focus-border"></span>
+      </div>
+    </div>
+    <div class="delete"></div>`;
+
+    const del = div.querySelector('.delete');
+    del.addEventListener('click', deleteListener(del));
+    Array.from(div.querySelectorAll('input')).forEach(input => {
+      input.addEventListener('change', updateLigands);
+    });
+
+    Array.from(div.querySelectorAll('input')).forEach(input => {
+      input.addEventListener('focusin', focusListener(div));
+      input.addEventListener('focusout', unfocusListener(div));
+    });
+    parent.appendChild(div);
+    updateLigands();
+    return div;
+}
+
+function updateLigands() {
+  let ligands = [];
+  let fragment = [];
+
+  const ligandElements = Array.from(document.getElementById('ligands').children);
+  let selected=-1;
+  let j=0;
+  for (let i=0; i<ligandElements.length; i++) {
+    const l = ligandElements[i]
+    if (l.classList.contains('ligand')) {
+      const x = parseFloat(l.querySelector('input[name="x"]').value);
+      const y = parseFloat(l.querySelector('input[name="y"]').value);
+      const z = parseFloat(l.querySelector('input[name="z"]').value);
+      const eSigma = parseFloat(l.querySelector('input[name="eSigma"]').value);
+      const ePi = parseFloat(l.querySelector('input[name="ePi"]').value);
+      if (!isNaN(x) && !isNaN(y) && !isNaN(z))
+        ligands.push(new THREE.Vector3(x,y,z));
+
+      if (!isNaN(x) || !isNaN(y) || !isNaN(z) || eSigma || ePi)
+        fragment.push([x,y,z,eSigma,ePi]);
+
+      if(l.classList.contains('selected')) selected=j;
+      j++;
+    }
+  }
+
+  if(fragment.length != 0) window.location.hash = `#${btoa(JSON.stringify(fragment))}`;
+  else window.location.hash = '';
+
+  visualizer.setLigands(ligands, selected);
+}
+
+function parseFragment() {
+  const fragmentString = window.location.hash.substring(1);
+  const parent = document.getElementById('ligands');
+  if (!fragmentString) {
+    newLigand();
+    return;
+  }
+  const fragment = JSON.parse(atob(fragmentString));
+  Array.from(parent.querySelectorAll('.ligand')).forEach(l => {
+    parent.removeChild(l);
+  });
+
+  if (fragment.length == 0) {
+    newLigand();
+    return;
+  }
+
+  fragment.forEach(l => {
+    let [x, y, z, eSigma, ePi] = l.map(x=> {
+      if (x===null) return '';
+      return x;
+    });
+    newLigand(eSigma, ePi, x, y, z);
+  });
+  updateLigands();
+}
+
+function deleteListener(del) {
+  const parent = del.parentElement;
+  return (e=> {
+    parent.parentElement.removeChild(parent);
+    if (document.querySelectorAll('#ligands .ligand').length <= 0)
+      newLigand();
+    updateLigands();
+  });
+}
+
+function focusListener(ligand) {
+  return (e=>{
+    ligand.classList.add('selected');
+    updateLigands();
+  });
+}
+
+function unfocusListener(ligand) {
+  return (e=>{
+    ligand.classList.remove('selected');
+    updateLigands();
+  });
+}
+
+//updateLigands();
+window.updateLigands = updateLigands;
+</script>

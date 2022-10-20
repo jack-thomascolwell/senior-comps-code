@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="input.css" />
+    <title>Input Demo</title>
+  </head>
+  <body>
+    <div id="calculator">
+      <div id="input">
+        <div id="ligands">
+          <div class="heading">
+            <h2>Ligands</h2>
+            <label id="newLigand">
+              <div class="button">New Ligand</div>
+              <div class="dropdown" onclick="this.parentElement.classList.toggle('expanded')"></div>
+              <ul class="menu">
+                <li data-esigma="1200" data-epi="0">Water</li>
+                <li>Cyanide</li>
+                <li>Carbonyl</li>
+              </ul>
+            </label>
+          </div>
+          <div class="ligand">
+            <div class="orderedPair position">
+              <span class="parenthesis"></span>
+              <div class="input">
+                <input type="number" placeholder=" " name="x">
+                <label>x</label>
+                <span class="focus-border"></span>
+              </div>
+              <span class="separator"></span>
+              <div class="input">
+                <input type="number" placeholder=" " name="y">
+                <label>y</label>
+                <span class="focus-border"></span>
+              </div>
+              <span class="separator"></span>
+              <div class="input">
+                <input type="number" placeholder=" " name="z">
+                <label>z</label>
+                <span class="focus-border"></span>
+              </div>
+              <span class="parenthesis"></span>
+            </div>
+            <div class="energies">
+              <div class="input">
+                <input type="number" placeholder=" " name="eSigma">
+                <label>e&sigma;</label>
+                <span class="focus-border"></span>
+              </div>
+              <div class="input">
+                <input type="number" placeholder=" " name="ePi">
+                <label>e&pi;</label>
+                <span class="focus-border"></span>
+              </div>
+            </div>
+            <div class="delete"></div>
+          </div>
+        </div>
+        <div id="visualizer"></div>
+        <div id="visualizerControls">
+          <ul id="orbitals">
+            <li>dz<span class="super">2</span></li>
+            <li>dx<span class="super">2</span>-y<span class="super">2</span></li>
+            <li>dxz</li>
+            <li>dyz</li>
+            <li>dxy</li>
+          </ul>
+        </div>
+        <div id="calculate"></div>
+      </div>
+      <div id="output">
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/three@0.145/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.145/examples/js/controls/OrbitControls.js"></script>
+
+    <script type="module" defer>
+    'use strict'
+
+    export class Visualizer {
+      #ligands = [];
+      #animationFrame;
+      #selected = -1;
+
+      static #ligandColor = new THREE.Color(0x808080);
+      static #selectedColor = new THREE.Color(0x4040bf);
+
+      static #bondColor(color=Visualizer.#ligandColor) {
+        const newColor = color.clone();
+        newColor.offsetHSL(0,0,0.25);
+        return newColor;
+      }
+
+      constructor(parent=document.body) {
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(parent.getBoundingClientRect().width, parent.getBoundingClientRect().height);
+        parent.appendChild(this.renderer.domElement);
+
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+        this.camera.position.set(0,5,5);
+        this.camera.lookAt(0,0,0);
+
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.autoRotate = true;
+        this.controls.update();
+
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(1,1,1);
+
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        this.scene.add(this.ambientLight);
+
+        this.axesHelper = new THREE.AxesHelper(1.5);
+        this.scene.add(this.axesHelper);
+
+        const resizeUpdateInterval = 500;
+
+        window.addEventListener('resize', () => {
+          const width = parent.getBoundingClientRect().width;
+          const height = parent.getBoundingClientRect().height;
+          this.camera.aspect = width / height;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(width, height);
+          const canvas = this.renderer.domElement;
+          const ratio = window.devicePixelRatio;
+          canvas.width = width * ratio;
+          canvas.height = height * ratio;
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+        });
+      }
+
+      set running(run) {
+        if (run) {
+          if (this.#animationFrame === undefined) this.animate();
+        } else {
+          if (this.#animationFrame !== undefined) {
+            window.cancelAnimationFrame(this.#animationFrame);
+            this.#animationFrame = undefined;
+          }
+        }
+      }
+
+      get running() {
+        return (this.#animationFrame !== undefined);
+      }
+
+      set showAxes(show) {
+        this.axesHelper.visible = show;
+      }
+
+      get showAxes() {
+        return this.axesHelper.visible;
+      }
+
+      #createLigandMesh(position=new THREE.Vector3(0,1,0)) {
+        position.normalize();
+        const bondGeometry = new THREE.CapsuleGeometry(0.0625, 1, 12, 12);
+        const ligandGeometry = new THREE.SphereGeometry(0.25, 12, 12);
+        const bondMaterial = new THREE.MeshLambertMaterial({color: Visualizer.#bondColor()});
+        const ligandMaterial = new THREE.MeshLambertMaterial({color: Visualizer.#ligandColor});
+
+        const bond = new THREE.Mesh(bondGeometry, bondMaterial);
+        const ligand = new THREE.Mesh(ligandGeometry, ligandMaterial);
+        bond.name = 'bond';
+        ligand.name = 'ligand';
+        bond.position.set(0,0.5,0);
+        ligand.position.set(0,1,0);
+
+        const group = new THREE.Group();
+        group.add(bond);
+        group.add(ligand);
+
+        const rotation = new THREE.Quaternion();
+        rotation.setFromUnitVectors(new THREE.Vector3(0,1,0), position);
+        group.quaternion.copy(rotation);
+        return group;
+      }
+
+      addLigand(position) {
+        const i = this.#ligands.length
+        this.#ligands[i] = this.#createLigandMesh(position);
+        this.scene.add(this.#ligands[i]);
+      }
+
+      removeLigand(i) {
+        this.scene.remove(this.#ligands[i]);
+        //this.#ligands[i].dispose();
+        this.#ligands.splice(i,1);
+      }
+
+      updateLigand(i, position) {
+        this.scene.remove(this.#ligands[i]);
+        //this.#ligands[i].dispose();
+        this.#ligands[i] = this.#createLigandMesh(position);
+        scene.add(this.#ligands[i]);
+      }
+
+      clearLigands() {
+        this.#ligands.forEach(l => {
+          this.scene.remove(l);
+          //l.dispose();
+        });
+        this.#ligands = [];
+      }
+
+      selectLigand(i) {
+        if (i != -1) {
+          this.#ligands[i].children.forEach(m=>{
+            if (m.name == 'ligand') m.material.color = Visualizer.#selectedColor;
+            else m.material.color = Visualizer.#bondColor(Visualizer.#selectedColor);
+          });
+        }
+
+        if (this.#selected != -1) {
+          this.#ligands[this.#selected].children.forEach(m=>{
+            if (m.name == 'ligand') m.material.color = Visualizer.#ligandColor;
+            else m.material.color = Visualizer.#bondColor();
+          });
+        }
+
+        this.#selected = i;
+      }
+
+      animate() {
+        this.#animationFrame = window.requestAnimationFrame(this.animate.bind(this));
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
+    function newLigand(eSigma='', ePi='') {
+      const div = document.createElement('div');
+      div.classList.add('ligand');
+      div.innerHTML = `
+        <div class="orderedPair position">
+          <span class="parenthesis"></span>
+          <div class="input">
+            <input type="number" placeholder=" " name="x">
+            <label>x</label>
+            <span class="focus-border"></span>
+          </div>
+          <span class="separator"></span>
+          <div class="input">
+            <input type="number" placeholder=" " name="y">
+            <label>y</label>
+            <span class="focus-border"></span>
+          </div>
+          <span class="separator"></span>
+          <div class="input">
+            <input type="number" placeholder=" " name="z">
+            <label>z</label>
+            <span class="focus-border"></span>
+          </div>
+          <span class="parenthesis"></span>
+        </div>
+        <div class="energies">
+          <div class="input">
+            <input type="number" placeholder=" " name="eSigma" value="${eSigma}">
+            <label>e&sigma;</label>
+            <span class="focus-border"></span>
+          </div>
+          <div class="input">
+            <input type="number" placeholder=" " name="ePi" value="${ePi}">
+            <label>e&pi;</label>
+            <span class="focus-border"></span>
+          </div>
+        </div>
+        <div class="delete"></div>`;
+        return div;
+    }
+
+    Array.from(document.querySelectorAll('#newLigand .menu li')).forEach(li => {
+      const esigma = li.dataset.esigma || '';
+      const epi = li.dataset.epi || '';
+      li.addEventListener('click', e=> {
+        const parent = newLigand(esigma, epi);
+        const del = parent.querySelector('.delete');
+        const grandparent = document.getElementById('ligands');
+        del.addEventListener('click', e=> {
+          grandparent.removeChild(parent);
+          updateLigands();
+        });
+        grandparent.appendChild(parent);
+        Array.from(parent.querySelectorAll('input')).forEach(input => {
+          input.addEventListener('change', updateLigands);
+        });
+      });
+    });
+
+    Array.from(document.querySelectorAll('.ligand .delete')).forEach(del => {
+      const parent = del.parentElement;
+      const grandparent = parent.parentElement;
+      del.addEventListener('click', e=> {
+        grandparent.removeChild(parent);
+        updateLigands();
+      });
+    });
+
+    document.querySelector('#newLigand .button').addEventListener('click', e=> {
+      const parent = newLigand();
+      const del = parent.querySelector('.delete');
+      const grandparent = document.getElementById('ligands');
+      del.addEventListener('click', e=> {
+        grandparent.removeChild(parent);
+        updateLigands();
+      });
+      grandparent.appendChild(parent);
+      Array.from(parent.querySelectorAll('input')).forEach(input => {
+        console.log(input);
+        input.addEventListener('change', updateLigands);
+      });
+    });
+
+    const visualizer = new Visualizer(document.getElementById('visualizer'));
+    visualizer.running = true;
+    function updateLigands() {
+      console.log('in update');
+      visualizer.clearLigands();
+      Array.from(document.querySelectorAll('.ligand')).forEach(l => {
+        const x = parseFloat(l.querySelector('input[name="x"]').value);
+        const y = parseFloat(l.querySelector('input[name="y"]').value);
+        const z = parseFloat(l.querySelector('input[name="z"]').value);
+        const eSigma = parseFloat(l.querySelector('input[name="eSigma"]').value);
+        const ePi = parseFloat(l.querySelector('input[name="ePi"]').value);
+        console.log([l,x,y,z,eSigma,ePi]);
+        if (x!==NaN && y!==NaN && z!==NaN) visualizer.addLigand(new THREE.Vector3(x,y,z));
+      });
+    }
+
+    Array.from(document.querySelectorAll('.ligand input')).forEach(input => {
+      input.addEventListener('change', updateLigands);
+    });
+
+    //updateLigands();
+    window.updateLigands = updateLigands;
+    console.log([visualizer, updateLigands]);
+    </script>
+  </body>
+</html>

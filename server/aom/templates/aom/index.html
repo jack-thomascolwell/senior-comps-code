@@ -1,0 +1,63 @@
+{% load static %}
+
+<!--Encode in fragment instead of query-->
+
+<script type="text/javascript">
+  function addligand(eSigma='', ePi='', x='', y='', z='', psi='') {
+    li = document.createElement('li');
+    li.innerHTML=`(<label for="x">x: </label><input type="number" name="x" value=${x}/>, <label for="y">y: </label><input type="number" name="y" value=${y}/>, <label for="z">z: </label><input type="number" name="z" value=${z}/>)(<label for="e_sigma">e&#963;: </label><input type="number" name="e_sigma" value="${eSigma}"/>, <label for="e_pi">e&#963;: </label><input type="number" name="e_pi" value="${ePi}"/>)`;
+    document.getElementById('ligands').appendChild(li);
+  }
+
+  function parseQuery() {
+    ligands = document.getElementById('ligands');
+    ligands.children = [];
+    window.location.search.split('&').forEach(q => {
+      x,y,z,psi,eSigma,ePi = JSON.parse(q);
+      addligand(eSigma,ePi,x,y,z,psi);
+    });
+  }
+
+  function generateQuery() {
+    query = ''
+    Array.from(document.getElementById('ligands').children).forEach((li, i) => {
+      x = li.querySelector('input[name=x]').value || 0;
+      y = li.querySelector('input[name=y]').value || 0;
+      z = li.querySelector('input[name=z]').value || 0;
+      psi = 0;
+      eSigma = li.querySelector('input[name=e_sigma]').value || 0;
+      ePi = li.querySelector('input[name=e_pi]').values || 0;
+      query += `l${i}=[${x},${y},${z},${psi},${eSigma},${ePi}]&`;
+    });
+
+    let obj={ Title: document.title, Url: `${window.location.href.split('?')[0]}?${query}` };
+    history.pushState(obj, obj.Title, obj.Url);
+    return query
+  }
+
+  function calculate() {
+    location.assign(`{% url 'aom:compute' %}?${generateQuery()}`);
+  }
+</script>
+
+<style>
+  a:hover {
+    color: blue;
+    cursor: pointer;
+  }
+</style>
+
+{% if ligands %}
+<ul>
+  {% for l in ligands %}
+  <li><a onclick="addligand({{l.e_sigma}}, {{l.e_pi}})">{{l.name}}: e&#963;={{l.e_sigma}}cm-1, e&#960;={{l.e_pi}}cm-1</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+No preset ligands are available.
+{% endif %}
+
+<ul id="ligands"></ul>
+<a onclick="addligand()">New Ligand</a>
+<br/>
+<a onclick="calculate()">Calculate</a>
