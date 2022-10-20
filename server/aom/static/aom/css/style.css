@@ -212,6 +212,15 @@ body {
   grid-area: visualizer;
   width: 100%;
   height: 100%;
+  position: relative;
+}
+#calculator #input #visualizer .axesLabel {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 5px;
+  font: 15px / 24px monospace;
+  display: flex;
 }
 #calculator #input #visualizerControls {
   grid-area: controls;
@@ -320,7 +329,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 /*# sourceMappingURL=style.css.map */

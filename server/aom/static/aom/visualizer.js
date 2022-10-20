@@ -6,10 +6,16 @@ export default class Visualizer {
   #animationFrame;
   #orbitals;
   #bonds = true;
+  #axesLabel;
 
   static #ligandColor = new THREE.Color(0x808080);
   static #orbitalColor = new THREE.Color(0x303050);
   static #selectedColor = new THREE.Color(0x4040bf);
+  static #axesColors = {
+    x: new THREE.Color("hsl(0, 75%, 50%)"),
+    y: new THREE.Color("hsl(120, 75%, 50%)"),
+    z: new THREE.Color("hsl(240, 75%, 50%)"),
+  };
 
   static #ligandRadius = 0.125;
   static #bondRadius = 0.125/4;
@@ -43,6 +49,7 @@ export default class Visualizer {
     this.scene.add(this.ambientLight);
 
     this.axesHelper = new THREE.AxesHelper(1.5);
+    this.axesHelper.setColors(Visualizer.#axesColors['x'], Visualizer.#axesColors['y'], Visualizer.#axesColors['z']);
     this.scene.add(this.axesHelper);
 
     this.#orbitals = new THREE.Group();
@@ -67,13 +74,18 @@ export default class Visualizer {
     //TODO: remove before production
     //window.orbitals = this.#orbitals;
     window.visualizer = this;
+
     window.addEventListener('resize', e => {
       const {width, height} = parent.getBoundingClientRect();
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
-      console.log([width, height]);
     });
+
+    this.#axesLabel = document.createElement('div');
+    this.#axesLabel.classList.add('axesLabel');
+    this.#axesLabel.innerHTML = `(<span style="color:${Visualizer.#axesColors['x'].getStyle()};">x</span>, <span style="color:${Visualizer.#axesColors['y'].getStyle()};">y</span>, <span style="color:${Visualizer.#axesColors['z'].getStyle()};">z</span>)`
+    parent.appendChild(this.#axesLabel);
   }
 
   set bonds(bonds) {
@@ -105,6 +117,8 @@ export default class Visualizer {
   }
 
   set showAxes(show) {
+    if(show) this.#axesLabel.classList.remove('hidden');
+    else this.#axesLabel.classList.add('hidden');
     this.axesHelper.visible = show;
   }
 

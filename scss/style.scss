@@ -1,3 +1,4 @@
+@use "sass:list";
 @use "util/variables" as v;
 @use 'dropdown';
 @use 'button';
@@ -113,6 +114,16 @@ body {
       grid-area: visualizer;
       width: 100%;
       height: 100%;
+      position: relative;
+
+      .axesLabel {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: v.$padding;
+        font: list.slash(v.$font-size, v.$line-height) v.$font-monospace;
+        display: flex;
+      }
     }
 
     #visualizerControls {
@@ -127,10 +138,6 @@ body {
       padding: 5px;
       box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
       grid-area: ligands;
-
-      .tab {
-
-      }
 
       .heading {
         display: flex;
@@ -247,5 +254,5 @@ body {
 
 
 .hidden {
-  display: none;
+  display: none !important;
 }
