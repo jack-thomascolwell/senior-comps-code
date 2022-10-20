@@ -1,0 +1,19 @@
+@use "sass:list";
+@use "util/variables" as v;
+
+.button {
+  user-select: none;
+  box-sizing: border-box;
+  border: v.$border;
+  border-radius: v.$border-radius;
+  background-color: v.$color-bg;
+  cursor: pointer;
+  font: list.slash(v.$font-size, v.$line-height) v.$font-monospace;
+  color: v.$color-text;
+  width: fit-content;
+  padding: 0px v.$padding;
+
+  &:hover {
+    background-color: v.$color-bg-hover;
+  }
+}
