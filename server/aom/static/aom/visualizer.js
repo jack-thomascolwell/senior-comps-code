@@ -76,16 +76,23 @@ export default class Visualizer {
     window.visualizer = this;
 
     window.addEventListener('resize', e => {
+      const autoRotate = this.autoRotate;
+      const view = this.view;
       const {width, height} = parent.getBoundingClientRect();
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
+      this.view = view;
+      this.autoRotate = autoRotate;
     });
 
     this.#axesLabel = document.createElement('div');
     this.#axesLabel.classList.add('axesLabel');
     this.#axesLabel.innerHTML = `(<span style="color:${Visualizer.#axesColors['x'].getStyle()};">x</span>, <span style="color:${Visualizer.#axesColors['y'].getStyle()};">y</span>, <span style="color:${Visualizer.#axesColors['z'].getStyle()};">z</span>)`
     parent.appendChild(this.#axesLabel);
+
+    this.view = new THREE.Vector3(1,1,-1);
+    this.autoRotate = true;
   }
 
   set bonds(bonds) {
@@ -135,9 +142,19 @@ export default class Visualizer {
   }
 
   set view(position) {
+    // Calcualte correct camera distance
+    const size = new THREE.Vector3();
+    const boundingBox = new THREE.Box3();
+    boundingBox.setFromObject(this.scene);
+    boundingBox.getSize(size);
+
+    const fov = this.camera.fov * (Math.PI / 180);
+    const fovh = 2*Math.atan(Math.tan(fov/2) * this.camera.aspect);
+    const dx = size.z / 2 + Math.abs(size.x / 2 / Math.tan(fovh / 2));
+    const dy = size.z / 2 + Math.abs(size.y / 2 / Math.tan(fov / 2));
     this.autoRotate = false;
     position.normalize();
-    position.multiplyScalar(3.46);
+    position.multiplyScalar(Math.max(dx, dy) * 1.25);
     this.camera.position.copy(position);
   }
 
@@ -190,8 +207,13 @@ export default class Visualizer {
 
   showOrbital(name) {
     this.#orbitals.children.forEach(o => {
-      if (o.name == name) o.visible = true;
-      else o.visible = false;
+      if (o.name == name || name === '') o.visible = true;
+    });
+  }
+
+  hideOrbital(name) {
+    this.#orbitals.children.forEach(o => {
+      if (o.name == name || name === '') o.visible = false;
     });
   }
 

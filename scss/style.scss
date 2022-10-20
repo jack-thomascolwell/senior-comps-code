@@ -106,9 +106,9 @@ body {
 
     display: grid;
     grid-template-columns: 60fr 40fr;
-    grid-template-rows: 50fr 25fr 25fr;
+    grid-template-rows: auto 1fr;
     grid-gap: 15px;
-    grid-template-areas: "ligands visualizer" "ligands controls" "ligands calculate";
+    grid-template-areas: "ligands controls" "ligands visualizer";
 
     #visualizer {
       grid-area: visualizer;
@@ -132,34 +132,68 @@ body {
       flex-direction: row;
       justify-content: space-around;
       align-items: center;
+
+      #orbitals li:not([data-name="hide all"]):not([data-name="show all"]):not(.showing) {
+        color: lighten(v.$color-text, 50%);
+      }
     }
 
     #ligands {
-      padding: 5px;
-      box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+      padding: 10px;
+      box-shadow: 0 14px 14px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
       grid-area: ligands;
 
       .heading {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding: 5px;
-        h2 {
-          margin: 0;
-          padding: 5px;
-          font: 32px/40px sans-serif;
+        margin: 0;
+        margin-bottom: 5px;
+        font: 32px/40px v.$font-sans-serif;
+      }
+
+      .description {
+        margin: 0;
+        font: list.slash(v.$font-size, v.$line-height) v.$font-sans-serif;
+        &:last-of-type {
+          margin-bottom: v.$line-height;
         }
       }
 
-      .ligand {
+      .controls {
         display: flex;
-        flex-direction: row;
+        flex-direction: start;
         justify-content: flex-start;
         align-items: center;
-        flex-wrap: nowrap;
-        margin-top: 15px;
 
+        > * {
+          margin: 0px v.$padding;
+          &:first-child {
+            margin-left: 0px;
+          }
+
+          &:last-child {
+            margin-right: 0px;
+          }
+        }
+      }
+
+      &:not(.start) .ligand .start {
+        display: none;
+      }
+
+      &.start .ligand .end{
+        display: none;
+      }
+
+      .ligand {
+        .start, .end {
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: center;
+          flex-wrap: nowrap;
+          width: 100%;
+        }
+
+        margin-top: 15px;
         width: 100%;
 
         .delete {
@@ -200,10 +234,6 @@ body {
 
   #output {
     grid-area: output;
-  }
-
-  #calculate {
-    grid-area: calculate;
   }
 }
 
@@ -252,6 +282,9 @@ body {
   }
 }
 
+.monospace {
+  font-family: v.$font-monospace;
+}
 
 .hidden {
   display: none !important;

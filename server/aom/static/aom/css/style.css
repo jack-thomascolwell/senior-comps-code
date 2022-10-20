@@ -12,6 +12,7 @@
   background-color: white;
   font: 15px / 24px monospace;
   color: #212121;
+  text-transform: lowercase;
   cursor: pointer;
   width: fit-content;
   position: relative;
@@ -109,9 +110,35 @@
   color: #212121;
   width: fit-content;
   padding: 0px 5px;
+  text-transform: lowercase;
 }
 .button:hover {
   background-color: #f2f2f2;
+}
+.button.toggle {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+.button.toggle::after {
+  content: "/";
+  padding: 0px 5px;
+  order: 2;
+}
+.button.toggle .toggle_on {
+  order: 1;
+  color: #212121;
+}
+.button.toggle .toggle_off {
+  order: 3;
+  color: #a1a1a1;
+}
+.button.toggle.selected .toggle_on {
+  color: #a1a1a1;
+}
+.button.toggle.selected .toggle_off {
+  color: #212121;
 }
 
 :root {
@@ -204,9 +231,9 @@ body {
   grid-area: input;
   display: grid;
   grid-template-columns: 60fr 40fr;
-  grid-template-rows: 50fr 25fr 25fr;
+  grid-template-rows: auto 1fr;
   grid-gap: 15px;
-  grid-template-areas: "ligands visualizer" "ligands controls" "ligands calculate";
+  grid-template-areas: "ligands controls" "ligands visualizer";
 }
 #calculator #input #visualizer {
   grid-area: visualizer;
@@ -229,30 +256,57 @@ body {
   justify-content: space-around;
   align-items: center;
 }
+#calculator #input #visualizerControls #orbitals li:not([data-name="hide all"]):not([data-name="show all"]):not(.showing) {
+  color: #a1a1a1;
+}
 #calculator #input #ligands {
-  padding: 5px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  padding: 10px;
+  box-shadow: 0 14px 14px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   grid-area: ligands;
 }
 #calculator #input #ligands .heading {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 5px;
-}
-#calculator #input #ligands .heading h2 {
   margin: 0;
-  padding: 5px;
+  margin-bottom: 5px;
   font: 32px/40px sans-serif;
 }
+#calculator #input #ligands .description {
+  margin: 0;
+  font: 15px / 24px sans-serif;
+}
+#calculator #input #ligands .description:last-of-type {
+  margin-bottom: 24px;
+}
+#calculator #input #ligands .controls {
+  display: flex;
+  flex-direction: start;
+  justify-content: flex-start;
+  align-items: center;
+}
+#calculator #input #ligands .controls > * {
+  margin: 0px 5px;
+}
+#calculator #input #ligands .controls > *:first-child {
+  margin-left: 0px;
+}
+#calculator #input #ligands .controls > *:last-child {
+  margin-right: 0px;
+}
+#calculator #input #ligands:not(.start) .ligand .start {
+  display: none;
+}
+#calculator #input #ligands.start .ligand .end {
+  display: none;
+}
 #calculator #input #ligands .ligand {
+  margin-top: 15px;
+  width: 100%;
+}
+#calculator #input #ligands .ligand .start, #calculator #input #ligands .ligand .end {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   flex-wrap: nowrap;
-  margin-top: 15px;
   width: 100%;
 }
 #calculator #input #ligands .ligand .delete {
@@ -284,9 +338,6 @@ body {
 }
 #calculator #output {
   grid-area: output;
-}
-#calculator #calculate {
-  grid-area: calculate;
 }
 
 .orderedPair {
@@ -326,6 +377,10 @@ body {
   content: ")";
   font: 15px/15px monospace;
   transform: scaleY(3.25);
+}
+
+.monospace {
+  font-family: monospace;
 }
 
 .hidden {

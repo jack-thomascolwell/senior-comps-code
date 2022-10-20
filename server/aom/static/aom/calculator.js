@@ -4,66 +4,115 @@ import Visualizer from './visualizer.js';
 
 /*
 Generates new ligand input with specified values
-param eSigma: target eSigma value, default empty
-param ePi: target eSigma value, default empty
-param x: target eSigma value, default empty
-param y: target eSigma value, default empty
-param z: target eSigma value, default empty
+param eSigmaStart: target eSigma value, default empty
+param ePiStart: target eSigma value, default empty
+param xStart: target eSigma value, default empty
+param yStart: target eSigma value, default empty
+param zStart: target eSigma value, default empty
+param eSigmaEnd: target eSigma value, default empty
+param ePiEnd: target eSigma value, default empty
+param xEnd: target eSigma value, default empty
+param yEnd: target eSigma value, default empty
+param zEnd: target eSigma value, default empty
+
 param parent: target parent element, default #ligands
 return: the new ligand element
 */
-function newLigand({eSigma:eSigma='', ePi:ePi='', x:x='', y:y='', z:z='', parent: parent=document.getElementById('ligands')}={}) {
+function newLigand({start: {eSigma:eSigmaStart='', ePi:ePiStart='', x:xStart='', y:yStart='', z:zStart=''}={}, end: {eSigma:eSigmaEnd='', ePi:ePiEnd='', x:xEnd='', y:yEnd='', z:zEnd=''}={}, parent: parent=document.getElementById('ligands')}={}) {
   const div = document.createElement('div');
+  eSigmaEnd = eSigmaEnd || eSigmaStart;
+  ePiEnd = ePiEnd || ePiStart;
+  xEnd = xEnd || xStart;
+  yEnd = yEnd || yStart;
+  zEnd = zEnd || zStart;
   div.classList.add('ligand');
   div.innerHTML = `
-    <div class="orderedPair position">
-      <span class="parenthesis"></span>
-      <div class="input">
-        <input type="number" placeholder=" " name="x" value="${x}">
-        <label>x</label>
-        <span class="focus-border"></span>
+    <div class="start">
+      <div class="orderedPair position">
+        <span class="parenthesis"></span>
+        <div class="input">
+          <input type="number" placeholder=" " name="x" value="${xStart}">
+          <label>x</label>
+          <span class="focus-border"></span>
+        </div>
+        <span class="separator"></span>
+        <div class="input">
+          <input type="number" placeholder=" " name="y" value="${yStart}">
+          <label>y</label>
+          <span class="focus-border"></span>
+        </div>
+        <span class="separator"></span>
+        <div class="input">
+          <input type="number" placeholder=" " name="z" value="${zStart}">
+          <label>z</label>
+          <span class="focus-border"></span>
+        </div>
+        <span class="parenthesis"></span>
       </div>
-      <span class="separator"></span>
-      <div class="input">
-        <input type="number" placeholder=" " name="y" value="${y}">
-        <label>y</label>
-        <span class="focus-border"></span>
+      <div class="energies">
+        <div class="input">
+          <input type="number" placeholder=" " name="eSigma" value="${eSigmaStart}">
+          <label>e&sigma;</label>
+          <span class="focus-border"></span>
+        </div>
+        <div class="input">
+          <input type="number" placeholder=" " name="ePi" value="${ePiStart}">
+          <label>e&pi;</label>
+          <span class="focus-border"></span>
+        </div>
       </div>
-      <span class="separator"></span>
-      <div class="input">
-        <input type="number" placeholder=" " name="z" value="${z}">
-        <label>z</label>
-        <span class="focus-border"></span>
-      </div>
-      <span class="parenthesis"></span>
+      <div class="delete"></div>
     </div>
-    <div class="energies">
-      <div class="input">
-        <input type="number" placeholder=" " name="eSigma" value="${eSigma}">
-        <label>e&sigma;</label>
-        <span class="focus-border"></span>
+    <div class="end">
+      <div class="orderedPair position">
+        <span class="parenthesis"></span>
+        <div class="input">
+          <input type="number" placeholder=" " name="x" value="${xEnd}">
+          <label>x</label>
+          <span class="focus-border"></span>
+        </div>
+        <span class="separator"></span>
+        <div class="input">
+          <input type="number" placeholder=" " name="y" value="${yEnd}">
+          <label>y</label>
+          <span class="focus-border"></span>
+        </div>
+        <span class="separator"></span>
+        <div class="input">
+          <input type="number" placeholder=" " name="z" value="${zEnd}">
+          <label>z</label>
+          <span class="focus-border"></span>
+        </div>
+        <span class="parenthesis"></span>
       </div>
-      <div class="input">
-        <input type="number" placeholder=" " name="ePi" value="${ePi}">
-        <label>e&pi;</label>
-        <span class="focus-border"></span>
+      <div class="energies">
+        <div class="input">
+          <input type="number" placeholder=" " name="eSigma" value="${eSigmaEnd}">
+          <label>e&sigma;</label>
+          <span class="focus-border"></span>
+        </div>
+        <div class="input">
+          <input type="number" placeholder=" " name="ePi" value="${ePiEnd}">
+          <label>e&pi;</label>
+          <span class="focus-border"></span>
+        </div>
       </div>
+      <div class="delete"></div>
     </div>
-    <div class="delete"></div>`;
+    `;
 
-    const del = div.querySelector('.delete');
+  Array.from(div.getElementsByClassName('delete')).forEach(del => {
     del.addEventListener('click', deleteListener(div));
-    Array.from(div.querySelectorAll('input')).forEach(input => {
-      input.addEventListener('change', updateLigands);
-    });
+  });
 
-    Array.from(div.querySelectorAll('input')).forEach(input => {
-      input.addEventListener('focusin', focusListener(div, false));
-      input.addEventListener('focusout', focusListener(div, true));
-    });
-    parent.appendChild(div);
-    updateLigands();
-    return div;
+  Array.from(div.querySelectorAll('input')).forEach(input => {
+    input.addEventListener('change', updateLigands);
+    input.addEventListener('focusin', focusListener(div, false));
+    input.addEventListener('focusout', focusListener(div, true));
+  });
+  parent.appendChild(div);
+  updateLigands();
+  return div;
 }
 
 /*
@@ -79,19 +128,48 @@ function updateLigands() {
   for (let i=0; i<ligandElements.length; i++) {
     const l = ligandElements[i]
     if (l.classList.contains('ligand')) {
-      const x = parseFloat(l.querySelector('input[name="x"]').value);
-      const y = parseFloat(l.querySelector('input[name="y"]').value);
-      const z = parseFloat(l.querySelector('input[name="z"]').value);
-      const eSigma = parseFloat(l.querySelector('input[name="eSigma"]').value);
-      const ePi = parseFloat(l.querySelector('input[name="ePi"]').value);
-      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-        ligands.push(new THREE.Vector3(x,y,z));
+      const xStart = parseFloat(l.querySelector('.start input[name="x"]').value);
+      const yStart = parseFloat(l.querySelector('.start input[name="y"]').value);
+      const zStart = parseFloat(l.querySelector('.start input[name="z"]').value);
+      const eSigmaStart = parseFloat(l.querySelector('.start input[name="eSigma"]').value);
+      const ePiStart = parseFloat(l.querySelector('.start input[name="ePi"]').value);
+
+      let xEnd = parseFloat(l.querySelector('.end input[name="x"]').value);
+      let yEnd = parseFloat(l.querySelector('.end input[name="y"]').value);
+      let zEnd = parseFloat(l.querySelector('.end input[name="z"]').value);
+      let eSigmaEnd = parseFloat(l.querySelector('.end input[name="eSigma"]').value);
+      let ePiEnd = parseFloat(l.querySelector('.end input[name="ePi"]').value);
+
+      if(isNaN(eSigmaStart) || isNaN(eSigmaEnd)) {
+        eSigmaEnd = eSigmaStart;
+        l.querySelector('.end input[name="eSigma"]').value = l.querySelector('.start input[name="eSigma"]').value;
+      }
+
+      if(isNaN(ePiStart) || isNaN(ePiEnd)) {
+        ePiEnd = ePiStart;
+        l.querySelector('.end input[name="ePi"]').value = l.querySelector('.start input[name="ePi"]').value;
+      }
+
+      const hasPositionStart = !isNaN(xStart) && !isNaN(yStart) && !isNaN(zStart);
+      const hasPositionEnd = !isNaN(xEnd) && !isNaN(yEnd) && !isNaN(zEnd);
+      if (hasPositionStart && !hasPositionEnd) {
+        xEnd = xStart;
+        yEnd = yStart;
+        zEnd = zStart;
+        l.querySelector('.end input[name="x"]').value = l.querySelector('.start input[name="x"]').value;
+        l.querySelector('.end input[name="y"]').value = l.querySelector('.start input[name="y"]').value;
+        l.querySelector('.end input[name="z"]').value = l.querySelector('.start input[name="z"]').value;
+      }
+
+      if (hasPositionStart) {
+        if (document.getElementById('ligands').classList.contains('start')) ligands.push(new THREE.Vector3(xStart,yStart,zStart));
+        else ligands.push(new THREE.Vector3(xEnd,yEnd,zEnd));
         if(l.classList.contains('selected')) selected=j;
         j++;
       }
 
-      if (!isNaN(x) || !isNaN(y) || !isNaN(z) || eSigma || ePi)
-        fragment.push([x,y,z,eSigma,ePi]);
+      if (!isNaN(xStart) || !isNaN(yStart) || !isNaN(zStart) || !isNaN(eSigmaStart) || !isNaN(ePiStart) || !isNaN(xEnd) || !isNaN(yEnd) || !isNaN(zEnd) || !isNaN(eSigmaEnd) || !isNaN(ePiEnd))
+        fragment.push([xStart,yStart,zStart,eSigmaStart,ePiStart,xEnd,yEnd,zEnd,eSigmaEnd,ePiEnd]);
     }
   }
 
@@ -122,11 +200,11 @@ function parseFragment() {
   }
 
   fragment.forEach(l => {
-    let [x, y, z, eSigma, ePi] = l.map(x=> {
+    let [xStart, yStart, zStart, eSigmaStart, ePiStart, xEnd, yEnd, zEnd, eSigmaEnd, ePiEnd] = l.map(x=> {
       if (x===null) return '';
       return x;
     });
-    newLigand({eSigma, ePi, x, y, z});
+    newLigand({start: {eSigma: eSigmaStart, ePi: ePiStart, x: xStart, y: yStart, z: zStart}, end: {eSigma: eSigmaEnd, ePi: ePiEnd, x: xEnd, y: yEnd, z: zEnd}});
   });
   updateLigands();
 }
@@ -170,16 +248,29 @@ parseFragment();
 Add controls to show/hide orbitals
 */
 {
-  let showingOrbital = '';
   Array.from(document.getElementById('orbitals').getElementsByTagName('li')).forEach(li => {
     const name = li.dataset.name;
+    if (name == 'show all') {
+      li.addEventListener('click', e=> {
+        visualizer.showOrbital('');
+      });
+      return;
+    }
+
+    if (name == 'hide all') {
+      li.addEventListener('click', e=> {
+        visualizer.hideOrbital('');
+      });
+      return;
+    }
+
     if (name) li.addEventListener('click', e=> {
-      if (showingOrbital == name) {
-        visualizer.showOrbital();
-        showingOrbital = '';
-      } else {
+      if (!li.classList.contains('showing')) {
         visualizer.showOrbital(name);
-        showingOrbital = name;
+        li.classList.add('showing');
+      } else {
+        visualizer.hideOrbital(name);
+        li.classList.remove('showing');
       }
     });
   });
@@ -235,8 +326,16 @@ Array.from(document.querySelectorAll('#newLigand .dropdown_menu li:not(.dropdown
   const eSigma = li.dataset.esigma || '';
   const ePi = li.dataset.epi || '';
   li.addEventListener('click', e=> {
-    newLigand({eSigma, ePi});
+    newLigand({start: {eSigma, ePi}, end: {eSigma, ePi}});
   });
+});
+
+/*
+Add controls to switch between start/end positions
+*/
+document.getElementById('startEnd').addEventListener('click', e => {
+  document.getElementById('ligands').classList.toggle('start');
+  updateLigands();
 });
 
 document.getElementById('newLigand').getElementsByClassName('dropdown_button')[0].addEventListener('click', e=> {

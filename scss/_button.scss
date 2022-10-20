@@ -12,8 +12,42 @@
   color: v.$color-text;
   width: fit-content;
   padding: 0px v.$padding;
+  text-transform: lowercase;
 
   &:hover {
     background-color: v.$color-bg-hover;
+  }
+
+  &.toggle {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+
+    &::after {
+      content: "/";
+      padding: 0px v.$padding;
+      order: 2;
+    }
+
+    .toggle_on {
+      order: 1;
+      color: v.$color-text;
+    }
+
+    .toggle_off {
+      order: 3;
+      color: lighten(v.$color-text, 50%);
+    }
+
+    &.selected {
+      .toggle_on {
+        color: lighten(v.$color-text, 50%);
+      }
+
+      .toggle_off {
+        color: v.$color-text;
+      }
+    }
   }
 }

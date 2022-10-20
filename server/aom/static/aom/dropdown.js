@@ -7,6 +7,12 @@ Array.from(document.getElementsByClassName('dropdown')).forEach(d=> {
     d.classList.toggle('expanded');
     e.stopPropagation();
   });
+  if (d.classList.contains('persist')) Array.from(d.getElementsByTagName('li')).forEach(li => {
+    li.addEventListener('click', e => {
+      e.stopPropagation();
+    });
+  });
+
   if (!d.classList.contains('discrete')) d.getElementsByClassName('dropdown_button')[0].addEventListener('click', f);
   d.getElementsByClassName('dropdown_arrow')[0].addEventListener('click', f);
 });
