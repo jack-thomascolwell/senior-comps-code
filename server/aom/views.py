@@ -3,8 +3,10 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.templatetags.static import static
 from .models import Ligand
 from logging import getLogger
+import base64
 import re
 import aom.calculations
+import numpy as np
 # Create your views here.
 logger = getLogger('aom')
 
@@ -20,39 +22,62 @@ def index(request):
     return render(request, 'aom/index.html', context)
 
 def compute(request):
-    ligandsQuery = request.GET.values()
-    positions = []
-    energies = []
-    e_pi = []
-    logger.info(f'Recieved query: {ligandsQuery}')
-    for q in ligandsQuery:
-        match = re.search(r'^\s*\[(-?\d+.?\d*),(-?\d+.?\d*),(-?\d+.?\d*),(-?\d+.?\d*),(-?\d+.?\d*),(-?\d+.?\d*)\]\s*$', q)
+    def parse(str):
+        match = re.search(r'(?P<x>-?\d+\.?\d*),(?P<y>-?\d+\.?\d*),(?P<z>-?\d+\.?\d*),(?P<esigma>-?\d+\.?\d*),(?P<epi>-?\d+\.?\d*)',str)
         if (match == None):
-            logger.info(f'Ivalid query string, failed on {q}')
-            return HttpResponseBadRequest('Invalid query encoding')
-        x,y,z,psi,e_sigma,e_pi = match.groups()
-        positions.append((float(x),float(y),float(z),float(psi)))
-        energies.append((float(e_sigma), float(e_pi)))
+            return None
+        return { k: float(v) for k,v in match.groupdict().items() }
 
-    if (not aom.calculations.validate(positions)):
-        logger.info(f'Invalid ligand positions')
-        return HttpResponseBadRequest('Invalid ligand positions')
-    logger.info(f'Positions: {positions}')
-    logger.info(f'Energies: {energies}')
+    start = list(filter(lambda l:l, map(parse,request.GET.getlist('start'))))
+    end = list(filter(lambda l:l, map(parse,request.GET.getlist('end'))))
 
-    sigma_matrix, sigma_energies = aom.calculations.sigma(positions)
-    pi_matrix, pi_energies = aom.calculations.pi(positions)
-    logger.info(f'Sigma Matrix: {sigma_matrix} => {sigma_energies}')
-    logger.info(f'Pi Matrix: {pi_matrix} => {pi_energies}')
+    start = {
+        'position': np.array(list(map(lambda l: np.array([l["x"], l["y"], l["z"]]), start))),
+        'esigma': np.array(list(map(lambda l: l["esigma"], start))),
+        'epi': np.array(list(map(lambda l: l["epi"], start)))
+    }
 
-    sigma_matrix_str = aom.calculations.json(sigma_matrix.reshape(25))
-    sigma_energies_str = aom.calculations.json(sigma_energies)
-    pi_matrix_str = aom.calculations.json(pi_matrix.reshape(25))
-    pi_energies_str = aom.calculations.json(pi_energies)
+    end = {
+        'position': np.array(list(map(lambda l: np.array([l["x"], l["y"], l["z"]]), end))),
+        'esigma': np.array(list(map(lambda l: l["esigma"], end))),
+        'epi': np.array(list(map(lambda l: l["epi"], end)))
+    }
+
+    steps = 20
+    energies = np.zeros((steps,5))
+    sigmaMatrices = np.zeros((steps,5,5))
+    piMatrices = np.zeros((steps,5,5))
+    sigmaEnergies = np.zeros((steps,5))
+    piEnergies = np.zeros((steps,5))
+    for x in range(steps):
+        position = (start['position'] * (steps - x)/steps) + (end['position'] * x / steps)
+        esigma = (start['esigma'] * (steps - x)/steps) + (end['esigma'] * x / steps)
+        epi = (start['epi'] * (steps - x)/steps) + (end['epi'] * x / steps)
+
+        logger.debug(f"x={x}/{steps}")
+        logger.debug(f"positions={position}")
+        logger.debug(f"esigma={esigma}")
+        logger.debug(f"epi={epi}")
+
+        matSigma, energySigma = aom.calculations.sigma(position, esigma)
+        matPi, energyPi = aom.calculations.pi(position, epi)
+        sigmaMatrices[x] = matSigma
+        piMatrices[x] = matPi
+        sigmaEnergies[x] = energySigma
+        piEnergies[x] = energyPi
+        energies[x] = np.diag(matSigma + matPi)
+    logger.debug(f"energies={energies}")
+
+    energies_str = aom.calculations.json(energies)
+    sigmaMatrices_str = aom.calculations.json(sigmaMatrices)
+    piMatrices_str = aom.calculations.json(piMatrices)
+    sigmaEnergies_str = aom.calculations.json(sigmaEnergies)
+    piEnergies_str = aom.calculations.json(piEnergies)
 
     return JsonResponse({
-        'sigmaMatrix': sigma_matrix_str,
-        'sigmaEnergies': sigma_energies_str,
-        'piMatrix': pi_matrix_str,
-        'piEnergies': pi_energies_str,
-    })
+        'sigmaMatrices': sigmaMatrices_str,
+        'piMatrices': piMatrices_str,
+        'energies': energies_str,
+        'sigmaEnergies': sigmaEnergies_str,
+        'piEnergies': piEnergies_str
+    });

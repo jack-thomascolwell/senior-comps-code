@@ -29,7 +29,7 @@
 .dropdown.discrete .dropdown_button {
   padding: 0px 5px;
 }
-.dropdown.discrete .dropdown_button :hover {
+.dropdown.discrete .dropdown_button:hover {
   background-color: #f2f2f2;
 }
 .dropdown.discrete .dropdown_arrow {
@@ -220,88 +220,71 @@ body {
 #calculator {
   display: grid;
   box-sizing: border-box;
-  grid-template-rows: 100fr 100fr;
-  grid-template-columns: 100fr;
-  grid-template-areas: "input" "output";
-  width: 100vw;
-  height: 200vh;
-}
-#calculator #input {
   padding: 15px;
-  grid-area: input;
-  display: grid;
-  grid-template-columns: 60fr 40fr;
-  grid-template-rows: auto 1fr;
-  grid-gap: 15px;
-  grid-template-areas: "ligands controls" "ligands visualizer";
+  grid-template-rows: minmax(0, 1fr);
+  grid-column-gap: 15px;
+  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+  grid-template-areas: "display visualizer";
+  width: 100vw;
+  height: 100vh;
 }
-#calculator #input #visualizer {
+#calculator.output #ligands {
+  display: none;
+}
+#calculator.output #output {
+  display: block;
+}
+#calculator #visualizer {
   grid-area: visualizer;
-  width: 100%;
-  height: 100%;
-  position: relative;
+  box-sizing: border-box;
+  padding: 10px;
 }
-#calculator #input #visualizer .axesLabel {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding: 5px;
-  font: 15px / 24px monospace;
-  display: flex;
-}
-#calculator #input #visualizerControls {
-  grid-area: controls;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-}
-#calculator #input #visualizerControls #orbitals li:not([data-name="hide all"]):not([data-name="show all"]):not(.showing) {
-  color: #a1a1a1;
-}
-#calculator #input #ligands {
+#calculator #ligands, #calculator #output {
   padding: 10px;
   box-shadow: 0 14px 14px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  grid-area: ligands;
+  grid-area: display;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
-#calculator #input #ligands .heading {
+#calculator #ligands .heading, #calculator #output .heading {
   margin: 0;
   margin-bottom: 5px;
   font: 32px/40px sans-serif;
 }
-#calculator #input #ligands .description {
+#calculator #ligands .description, #calculator #output .description {
   margin: 0;
   font: 15px / 24px sans-serif;
 }
-#calculator #input #ligands .description:last-of-type {
+#calculator #ligands .description:last-of-type, #calculator #output .description:last-of-type {
   margin-bottom: 24px;
 }
-#calculator #input #ligands .controls {
+#calculator #ligands .controls, #calculator #output .controls {
   display: flex;
-  flex-direction: start;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 }
-#calculator #input #ligands .controls > * {
+#calculator #ligands .controls > *, #calculator #output .controls > * {
   margin: 0px 5px;
 }
-#calculator #input #ligands .controls > *:first-child {
+#calculator #ligands .controls > *:first-child, #calculator #output .controls > *:first-child {
   margin-left: 0px;
 }
-#calculator #input #ligands .controls > *:last-child {
+#calculator #ligands .controls > *:last-child, #calculator #output .controls > *:last-child {
   margin-right: 0px;
 }
-#calculator #input #ligands:not(.start) .ligand .start {
+#calculator #ligands:not(.start) .ligand .start {
   display: none;
 }
-#calculator #input #ligands.start .ligand .end {
+#calculator #ligands.start .ligand .end {
   display: none;
 }
-#calculator #input #ligands .ligand {
+#calculator #ligands .ligand {
   margin-top: 15px;
   width: 100%;
 }
-#calculator #input #ligands .ligand .start, #calculator #input #ligands .ligand .end {
+#calculator #ligands .ligand .start, #calculator #ligands .ligand .end {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -309,20 +292,20 @@ body {
   flex-wrap: nowrap;
   width: 100%;
 }
-#calculator #input #ligands .ligand .delete {
+#calculator #ligands .ligand .delete {
   font: 15px/15px sans-serif;
   margin-right: 5px;
   font-weight: bold;
   margin-left: auto;
   cursor: pointer;
 }
-#calculator #input #ligands .ligand .delete::after {
+#calculator #ligands .ligand .delete::after {
   content: "X";
 }
-#calculator #input #ligands .ligand .delete:hover {
+#calculator #ligands .ligand .delete:hover {
   color: #4caf50;
 }
-#calculator #input #ligands .ligand .energies {
+#calculator #ligands .ligand .energies {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -330,14 +313,20 @@ body {
   margin-left: 2em;
   width: 14em;
 }
-#calculator #input #ligands .ligand .energies input {
+#calculator #ligands .ligand .energies input {
   width: 6em;
 }
-#calculator #input #ligands .ligand .position input {
+#calculator #ligands .ligand .position input {
   width: 3em;
 }
 #calculator #output {
-  grid-area: output;
+  display: none;
+}
+#calculator #output #matrix {
+  margin-top: 15px;
+}
+#calculator #output #graph {
+  margin-top: 15px;
 }
 
 .orderedPair {
@@ -385,6 +374,80 @@ body {
 
 .hidden {
   display: none !important;
+}
+
+.matrix {
+  width: fit-content;
+  height: fit-content;
+  min-height: calc((10px + 1ex) * var(--rows));
+  min-width: calc((10px + 2ex) * var(--cols));
+  margin: 0;
+  padding: 1ex;
+  box-sizing: border-box;
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-rows: repeat(attr(data-rows), 1fr);
+  grid-template-columns: repeat(attr(data-cols), 1fr);
+  list-style: none;
+  font: 15px / 15px monospace;
+  position: relative;
+}
+.matrix li {
+  padding: 5px;
+}
+.matrix::before, .matrix::after {
+  content: " ";
+  width: calc(1ex - 2px);
+  height: calc(100% - 4px);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 2px solid #212121;
+}
+.matrix::before {
+  left: 1px;
+  border-right: none;
+}
+.matrix::after {
+  right: 1px;
+  border-left: none;
+}
+
+.visualizer {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, auto) minmax(0, 1fr);
+  grid-template-areas: "controls" "canvas";
+}
+.visualizer .controls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  align-content: flex-start;
+  flex-wrap: wrap;
+}
+.visualizer .controls #orbitals li:not([data-name="hide all"]):not([data-name="show all"]):not(.showing) {
+  color: #a1a1a1;
+}
+.visualizer .wrapper {
+  grid-area: canvas;
+  position: relative;
+}
+.visualizer .axesLabel {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 5px;
+  user-select: none;
+  font: 15px / 24px monospace;
+  display: flex;
 }
 
 /*# sourceMappingURL=style.css.map */

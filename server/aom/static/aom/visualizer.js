@@ -1,5 +1,6 @@
 'use strict'
 import orbitalPositions from './orbitals.json' assert {type: 'json'};
+import addDropdownCallbacks from './dropdown.js';
 
 export default class Visualizer {
   #ligands = [];
@@ -27,11 +28,99 @@ export default class Visualizer {
   }
 
   constructor(parent=document.body) {
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(parent.getBoundingClientRect().width, parent.getBoundingClientRect().height);
-    parent.appendChild(this.renderer.domElement);
+    const wrapper = parent.getElementsByClassName('wrapper')[0];
+    const controlsElement = document.createElement('div');
+    controlsElement.classList.add('controls');
+    controlsElement.innerHTML = `
+      <div class="button bonds">Bonds</div>
+      <label class="dropdown persist orbitals">
+        <div class="dropdown_button">d-Orbitals</div>
+        <div class="dropdown_arrow"></div>
+        <ul class="dropdown_menu">
+          <li data-name="show all">show all</li>
+          <li data-name="hide all">hide all</li>
+          <li class="dropdown__divider"></li>
+          <li data-name="dz2">dz<span class="super">2</span></li>
+          <li data-name="dx2-y2">dx<span class="super">2</span>-y<span class="super">2</span></li>
+          <li data-name="dxz">dxz</li>
+          <li data-name="dyz">dyz</li>
+          <li data-name="dxy">dxy</li>
+        </ul>
+      </label>
+      <div class="button axes">Axes</div>
+      <label class="dropdown view">
+        <div class="dropdown_button">View</div>
+        <div class="dropdown_arrow"></div>
+        <ul class="dropdown_menu">
+          <li data-view="[1,1,-1]" data-reset="true" title="reset">reset</li>
+          <li class="dropdown__divider"></li>
+          <li data-view="[1,1,-1]" title="isometric">isometric</li>
+          <li data-view="[0,0,1]" title="xz">xz</li>
+          <li data-view="[1,0,0]" title="yz">yz</li>
+          <li data-view="[0,1,0]" title="xy">xy</li>
+        </ul>
+      </label>
+      <div class="button rotate">Rotate</div>`;
 
-    this.camera = new THREE.PerspectiveCamera(45, parent.getBoundingClientRect().width / parent.getBoundingClientRect().height, 1, 500);
+    addDropdownCallbacks(controlsElement);
+
+    Array.from(controlsElement.getElementsByClassName('orbitals')[0].getElementsByTagName('li')).forEach(li => {
+      const name = li.dataset.name;
+      if (name == 'show all') {
+        li.addEventListener('click', e=> {
+          this.showOrbital('');
+        });
+        return;
+      }
+
+      if (name == 'hide all') {
+        li.addEventListener('click', e=> {
+          this.hideOrbital('');
+        });
+        return;
+      }
+
+      if (name) li.addEventListener('click', e=> {
+        if (!li.classList.contains('showing')) {
+          this.showOrbital(name);
+          li.classList.add('showing');
+        } else {
+          this.hideOrbital(name);
+          li.classList.remove('showing');
+        }
+      });
+    });
+
+    controlsElement.getElementsByClassName('axes')[0].addEventListener('click', e=> {
+      this.showAxes = !visualizer.showAxes;
+    });
+
+    controlsElement.getElementsByClassName('bonds')[0].addEventListener('click', e=> {
+      visualizer.bonds = !visualizer.bonds;
+    });
+
+    Array.from(controlsElement.querySelectorAll('.view .dropdown_menu li:not(.dropdown__divider)')).forEach(li => {
+      const [x,y,z] = JSON.parse(li.dataset.view || "[1,1,1]");
+      const position = new THREE.Vector3(x,y,z);
+      if (li.dataset.reset === undefined) li.addEventListener('click', e=> {
+        visualizer.view = position;
+      });
+      else li.addEventListener('click', e=> {
+        visualizer.view = position;
+        visualizer.autoRotate = true;
+      })
+    });
+
+    controlsElement.getElementsByClassName('rotate')[0].addEventListener('click', e=> {
+      visualizer.autoRotate = !visualizer.autoRotate;
+    });
+    parent.appendChild(controlsElement);
+
+    this.renderer = new THREE.WebGLRenderer();
+    this.renderer.setSize(wrapper.getBoundingClientRect().width, wrapper.getBoundingClientRect().height);
+    wrapper.appendChild(this.renderer.domElement);
+
+    this.camera = new THREE.PerspectiveCamera(45, wrapper.getBoundingClientRect().width / wrapper.getBoundingClientRect().height, 1, 500);
     this.camera.position.set(2,2,-2);
     this.camera.lookAt(0,0,0);
 
@@ -78,7 +167,7 @@ export default class Visualizer {
     window.addEventListener('resize', e => {
       const autoRotate = this.autoRotate;
       const view = this.view;
-      const {width, height} = parent.getBoundingClientRect();
+      const {width, height} = wrapper.getBoundingClientRect();
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
@@ -89,7 +178,7 @@ export default class Visualizer {
     this.#axesLabel = document.createElement('div');
     this.#axesLabel.classList.add('axesLabel');
     this.#axesLabel.innerHTML = `(<span style="color:${Visualizer.#axesColors['x'].getStyle()};">x</span>, <span style="color:${Visualizer.#axesColors['y'].getStyle()};">y</span>, <span style="color:${Visualizer.#axesColors['z'].getStyle()};">z</span>)`
-    parent.appendChild(this.#axesLabel);
+    wrapper.appendChild(this.#axesLabel);
 
     this.view = new THREE.Vector3(1,1,-1);
     this.autoRotate = true;

@@ -40,7 +40,7 @@
   &.discrete {
     .dropdown_button {
       padding: 0px v.$padding;
-      :hover {
+      &:hover {
         background-color: v.$color-bg-hover;
       }
     }

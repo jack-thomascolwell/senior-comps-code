@@ -26,8 +26,6 @@ def phi(l):
     return np.arccos(x / np.sqrt(x*x+y*y))
 
 def psi(l):
-    print(l)
-    print(len(l))
     if (len(l) >= 4):
         return l[3]
     return 0
@@ -83,28 +81,40 @@ def pi_y_matrix(l):
 def pi_matrix(l):
     return pi_x_matrix(l) + pi_y_matrix(l)
 
-def sigma(ligands):
+def sigma(ligands, energies=[]):
     mat = np.zeros((5,5))
-    for l in ligands:
-        mat += sigma_matrix(l)
+    for i, l in enumerate(ligands):
+        if (energies == []):
+            mat += sigma_matrix(l)
+        else:
+            mat += sigma_matrix(l) * energies[i]
     return mat, np.diag(mat)
 
-def pi_x(ligands):
+def pi_x(ligands, energies=[]):
     mat = np.zeros((5,5))
-    for l in ligands:
-        mat += pi_x_matrix(l)
+    for i, l in enumerate(ligands):
+        if (energies == []):
+            mat += pi_x_matrix(l)
+        else:
+            mat += pi_x_matrix(l) * energies[i]
     return mat, np.diag(mat)
 
-def pi_y(ligands):
+def pi_y(ligands, energies=[]):
     mat = np.zeros((5,5))
-    for l in ligands:
-        mat += pi_y_matrix(l)
+    for i, l in enumerate(ligands):
+        if (energies == []):
+            mat += pi_y_matrix(l)
+        else:
+            mat += pi_y_matrix(l) * energies[i]
     return mat, np.diag(mat)
 
-def pi(ligands):
+def pi(ligands, energies=[]):
     mat = np.zeros((5,5))
-    for l in ligands:
-        mat += pi_matrix(l)
+    for i, l in enumerate(ligands):
+        if (energies == []):
+            mat += pi_matrix(l)
+        else:
+            mat += pi_matrix(l) * energies[i]
     return mat, np.diag(mat)
 
 def json(mat):

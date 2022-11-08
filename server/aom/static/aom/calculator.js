@@ -117,59 +117,72 @@ function newLigand({start: {eSigma:eSigmaStart='', ePi:ePiStart='', x:xStart='',
 
 /*
 Parses ligand inputs and updates visualizer and url fragment
+return: an object containing the positions and energies of all ligands
 */
 function updateLigands() {
   let ligands = [];
   let fragment = [];
+  let request = {
+    start: [],
+    end: []
+  };
 
-  const ligandElements = Array.from(document.getElementById('ligands').children);
+  const ligandElements = Array.from(document.getElementById('ligands').getElementsByClassName('ligand'));
   let selected=-1;
   let j=0;
   for (let i=0; i<ligandElements.length; i++) {
     const l = ligandElements[i]
-    if (l.classList.contains('ligand')) {
-      const xStart = parseFloat(l.querySelector('.start input[name="x"]').value);
-      const yStart = parseFloat(l.querySelector('.start input[name="y"]').value);
-      const zStart = parseFloat(l.querySelector('.start input[name="z"]').value);
-      const eSigmaStart = parseFloat(l.querySelector('.start input[name="eSigma"]').value);
-      const ePiStart = parseFloat(l.querySelector('.start input[name="ePi"]').value);
+    let xStart = parseFloat(l.querySelector('.start input[name="x"]').value);
+    let yStart = parseFloat(l.querySelector('.start input[name="y"]').value);
+    let zStart = parseFloat(l.querySelector('.start input[name="z"]').value);
+    let eSigmaStart = parseFloat(l.querySelector('.start input[name="eSigma"]').value);
+    let ePiStart = parseFloat(l.querySelector('.start input[name="ePi"]').value);
 
-      let xEnd = parseFloat(l.querySelector('.end input[name="x"]').value);
-      let yEnd = parseFloat(l.querySelector('.end input[name="y"]').value);
-      let zEnd = parseFloat(l.querySelector('.end input[name="z"]').value);
-      let eSigmaEnd = parseFloat(l.querySelector('.end input[name="eSigma"]').value);
-      let ePiEnd = parseFloat(l.querySelector('.end input[name="ePi"]').value);
+    let xEnd = parseFloat(l.querySelector('.end input[name="x"]').value);
+    let yEnd = parseFloat(l.querySelector('.end input[name="y"]').value);
+    let zEnd = parseFloat(l.querySelector('.end input[name="z"]').value);
+    let eSigmaEnd = parseFloat(l.querySelector('.end input[name="eSigma"]').value);
+    let ePiEnd = parseFloat(l.querySelector('.end input[name="ePi"]').value);
 
-      if(isNaN(eSigmaStart) || isNaN(eSigmaEnd)) {
-        eSigmaEnd = eSigmaStart;
-        l.querySelector('.end input[name="eSigma"]').value = l.querySelector('.start input[name="eSigma"]').value;
-      }
+    if(isNaN(eSigmaStart) || isNaN(eSigmaEnd)) {
+      eSigmaEnd = eSigmaStart;
+      l.querySelector('.end input[name="eSigma"]').value = l.querySelector('.start input[name="eSigma"]').value;
+    }
 
-      if(isNaN(ePiStart) || isNaN(ePiEnd)) {
-        ePiEnd = ePiStart;
-        l.querySelector('.end input[name="ePi"]').value = l.querySelector('.start input[name="ePi"]').value;
-      }
+    if(isNaN(ePiStart) || isNaN(ePiEnd)) {
+      ePiEnd = ePiStart;
+      l.querySelector('.end input[name="ePi"]').value = l.querySelector('.start input[name="ePi"]').value;
+    }
 
-      const hasPositionStart = !isNaN(xStart) && !isNaN(yStart) && !isNaN(zStart);
-      const hasPositionEnd = !isNaN(xEnd) && !isNaN(yEnd) && !isNaN(zEnd);
-      if (hasPositionStart && !hasPositionEnd) {
-        xEnd = xStart;
-        yEnd = yStart;
-        zEnd = zStart;
-        l.querySelector('.end input[name="x"]').value = l.querySelector('.start input[name="x"]').value;
-        l.querySelector('.end input[name="y"]').value = l.querySelector('.start input[name="y"]').value;
-        l.querySelector('.end input[name="z"]').value = l.querySelector('.start input[name="z"]').value;
-      }
+    const hasPositionStart = !isNaN(xStart) && !isNaN(yStart) && !isNaN(zStart);
+    const hasPositionEnd = !isNaN(xEnd) && !isNaN(yEnd) && !isNaN(zEnd);
+    if (hasPositionStart && !hasPositionEnd) {
+      xEnd = xStart;
+      yEnd = yStart;
+      zEnd = zStart;
+      l.querySelector('.end input[name="x"]').value = l.querySelector('.start input[name="x"]').value;
+      l.querySelector('.end input[name="y"]').value = l.querySelector('.start input[name="y"]').value;
+      l.querySelector('.end input[name="z"]').value = l.querySelector('.start input[name="z"]').value;
+    }
 
-      if (hasPositionStart) {
-        if (document.getElementById('ligands').classList.contains('start')) ligands.push(new THREE.Vector3(xStart,yStart,zStart));
-        else ligands.push(new THREE.Vector3(xEnd,yEnd,zEnd));
-        if(l.classList.contains('selected')) selected=j;
-        j++;
-      }
+    if (hasPositionStart) {
+      if (document.getElementById('ligands').classList.contains('start')) ligands.push(new THREE.Vector3(xStart,yStart,zStart));
+      else ligands.push(new THREE.Vector3(xEnd,yEnd,zEnd));
+      if(l.classList.contains('selected')) selected=j;
+      j++;
+    }
 
-      if (!isNaN(xStart) || !isNaN(yStart) || !isNaN(zStart) || !isNaN(eSigmaStart) || !isNaN(ePiStart) || !isNaN(xEnd) || !isNaN(yEnd) || !isNaN(zEnd) || !isNaN(eSigmaEnd) || !isNaN(ePiEnd))
-        fragment.push([xStart,yStart,zStart,eSigmaStart,ePiStart,xEnd,yEnd,zEnd,eSigmaEnd,ePiEnd]);
+    if (!isNaN(xStart) || !isNaN(yStart) || !isNaN(zStart) || !isNaN(eSigmaStart) || !isNaN(ePiStart) || !isNaN(xEnd) || !isNaN(yEnd) || !isNaN(zEnd) || !isNaN(eSigmaEnd) || !isNaN(ePiEnd))
+      fragment.push([xStart,yStart,zStart,eSigmaStart,ePiStart,xEnd,yEnd,zEnd,eSigmaEnd,ePiEnd]);
+
+    if (hasPositionStart) {
+      if (isNaN(eSigmaStart)) eSigmaStart = 0;
+      if (isNaN(eSigmaEnd)) eSigmaEnd = 0;
+      if (isNaN(ePiStart)) ePiStart = 0;
+      if (isNaN(ePiEnd)) ePiEnd = 0;
+
+      request.start.push([xStart,yStart,zStart,eSigmaStart,ePiStart]);
+      request.end.push([xEnd,yEnd,zEnd,eSigmaEnd,ePiEnd]);
     }
   }
 
@@ -177,6 +190,7 @@ function updateLigands() {
   else window.location.hash = '';
 
   visualizer.setLigands(ligands, selected);
+  return request;
 }
 
 /*
@@ -240,84 +254,36 @@ function focusListener(ligand, unfocus=false) {
   });
 }
 
-const visualizer = new Visualizer(document.getElementById('visualizer'));
-visualizer.running = true;
-parseFragment();
-
 /*
-Add controls to show/hide orbitals
+Extracts ligand data and performs calculation
+return: false if no input
 */
-{
-  Array.from(document.getElementById('orbitals').getElementsByTagName('li')).forEach(li => {
-    const name = li.dataset.name;
-    if (name == 'show all') {
-      li.addEventListener('click', e=> {
-        visualizer.showOrbital('');
-      });
-      return;
+function calculate() {
+  let {start, end} = updateLigands();
+  if (start.length <= 0) return false;
+  const query = new URLSearchParams();
+  for (let l of start) query.append('start',l.join(','));
+  for (let l of end) query.append('end',l.join(','));
+  fetch(window.calculateURL + '?'+ query).then((response) => {
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+      return false;
     }
-
-    if (name == 'hide all') {
-      li.addEventListener('click', e=> {
-        visualizer.hideOrbital('');
+    response.json().then(json => {
+      Object.keys(json).forEach(k => {
+        json[k] = JSON.parse(json[k]);
       });
-      return;
-    }
-
-    if (name) li.addEventListener('click', e=> {
-      if (!li.classList.contains('showing')) {
-        visualizer.showOrbital(name);
-        li.classList.add('showing');
-      } else {
-        visualizer.hideOrbital(name);
-        li.classList.remove('showing');
-      }
+      console.log(json);
     });
   });
 }
 
-/*
-Add controls to show/hide axes
-*/
-{
-  document.getElementById('axes').addEventListener('click', e=> {
-    visualizer.showAxes = !visualizer.showAxes;
+window.calculate = calculate;
+window.updateLigands = updateLigands;
 
-  });
-}
-
-/*
-Add controls to show/hide bonds
-*/
-{
-  document.getElementById('bonds').addEventListener('click', e=> {
-    visualizer.bonds = !visualizer.bonds;
-  });
-}
-
-/*
-Add controls to set view
-*/
-Array.from(document.querySelectorAll('#view .dropdown_menu li:not(.dropdown__divider)')).forEach(li => {
-  const [x,y,z] = JSON.parse(li.dataset.view || "[1,1,1]");
-  const position = new THREE.Vector3(x,y,z);
-  if (li.dataset.reset === undefined) li.addEventListener('click', e=> {
-    visualizer.view = position;
-  });
-  else li.addEventListener('click', e=> {
-    visualizer.view = position;
-    visualizer.autoRotate = true;
-  })
-});
-
-/*
-Add controls to auto rotate
-*/
-{
-  document.getElementById('rotate').addEventListener('click', e=> {
-    visualizer.autoRotate = !visualizer.autoRotate;
-  });
-}
+const visualizer = new Visualizer(document.getElementById('visualizer'));
+visualizer.running = true;
+parseFragment();
 
 /*
 Add controls to add new ligands
