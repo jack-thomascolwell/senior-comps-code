@@ -1,5 +1,5 @@
 'use strict'
-import orbitalPositions from './orbitals.json' assert {type: 'json'};
+import orbitalPositions from '/static/aom/orbitals.json' assert {type: 'json'};
 import addDropdownCallbacks from './dropdown.js';
 import addToggleCallbacks from './button.js';
 

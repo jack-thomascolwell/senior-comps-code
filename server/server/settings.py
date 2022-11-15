@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-51j^7$!#2t4ffra&)$j_=lp-r+$acw!iy%rs7trlc81xv$u35)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
+ALLOWED_HOSTS = ['*','127.0.0.1', 'localhost', '.herokuapp.com']
 
 
 # Application definition
@@ -116,12 +116,11 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
         },
         'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+            'format': '%(levelname)s %(message)s'
         },
     },
     'filters': {
@@ -130,6 +129,12 @@ LOGGING = {
         },
     },
     'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'aom.log',
+            'formatter': 'verbose'
+        },
         'console': {
             'level': 'INFO',
             'filters': ['require_debug_true'],
@@ -139,14 +144,14 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers':['file','console'],
             'propagate': True,
+            'level':'DEBUG',
         },
         'aom': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'filters': ['require_debug_true']
-        }
+            'handlers': ['file','console'],
+            'level': 'DEBUG',
+        },
     }
 }
 

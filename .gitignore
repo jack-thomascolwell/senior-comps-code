@@ -1,3 +1,6 @@
 /server/server/.env
 **/__pycache__/
 /server/staticfiles/
+/server/aom.log
+**/.DS_Store
+**/__init__.py

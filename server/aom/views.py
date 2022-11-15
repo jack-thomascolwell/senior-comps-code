@@ -11,9 +11,8 @@ import numpy as np
 logger = getLogger('aom')
 
 def calculator(request):
-    url = static('orbitals.json');
     ligands = Ligand.objects.order_by('name')
-    context = { 'ligands': ligands, 'orbitals': url }
+    context = { 'ligands': ligands }
     return render(request, 'aom/calculator.html', context)
 
 def index(request):
