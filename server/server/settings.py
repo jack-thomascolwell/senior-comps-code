@@ -79,7 +79,7 @@ import dj_database_url
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_django-environopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'aom',
         'USER': 'jack',
         'PASSWORD': '',
