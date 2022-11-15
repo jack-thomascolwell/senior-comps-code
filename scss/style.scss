@@ -95,12 +95,19 @@ body {
   display: grid;
   box-sizing: border-box;
   padding: 15px;
-  grid-template-rows: minmax(0,1fr);
+  grid-template-rows: minmax(0,1fr) minmax(0,auto);
   grid-column-gap: 15px;
-  grid-template-columns: minmax(0,60fr) minmax(0,40fr);
-  grid-template-areas: "display visualizer";
+  grid-template-columns: minmax(0,55fr) minmax(0,45fr);
+  grid-template-areas: "display visualizer" "display button";
   width: 100vw;
   height: 100vh;
+
+  #compute {
+    content: " compute ";
+    grid-area: button;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
   &.output {
     #ligands {
@@ -125,6 +132,8 @@ body {
     height: 100%;
     width: 100%;
     box-sizing: border-box;
+    overflow-y: scroll;
+    overflow-x: hidden;
 
     .heading {
       margin: 0;
@@ -181,15 +190,21 @@ body {
       margin-top: 15px;
       width: 100%;
 
-      .delete {
-        font: 15px/15px sans-serif;
+      .reset {
+        font-size: 15px;
+        line-height: 15px;
         margin-right: 5px;
-        font-weight: bold;
-        margin-left: auto;
         cursor: pointer;
-        &::after {
-          content: 'X';
+        &:hover {
+          color: #4caf50;
         }
+      }
+
+      .delete {
+        font-size: 15px;
+        line-height: 15px;
+        margin-right: 5px;
+        cursor: pointer;
         &:hover {
           color: #4caf50;
         }
@@ -202,6 +217,7 @@ body {
         align-items: center;
         margin-left: 2em;
         width: calc(2*6em + 2em);
+        margin-right: auto;
 
         input {
           width: 6em;
@@ -219,12 +235,46 @@ body {
   #output {
     display: none;
 
-    #matrix {
-      margin-top: 15px;
-    }
+    #plot {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      grid-template-columns: 1fr;
+      grid-template-areas: 'controls' 'plot' 'matrix';
+      grid-row-gap: 15px;
 
-    #graph {
-      margin-top: 15px;
+      .controls {
+        grid-area: controls;
+      }
+
+      .matrices {
+        grid-area: matrix;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        flex-wrap: nowrap;
+
+        .matrix:not(.tooltip) {
+          order: 1;
+        }
+
+        .tooltip {
+          order: 3;
+        }
+
+        .arrow {
+          order: 2;
+          font-size: 24px;
+          line-height: 24px;
+          text-align: center;
+          margin: 0 1ch;
+        }
+      }
+
+      .wrapper {
+        grid-area: plot;
+        cursor: pointer;
+      }
     }
   }
 }
@@ -285,21 +335,26 @@ body {
 .matrix {
   width: fit-content;
   height: fit-content;
-  min-height: calc((v.$padding * 2 + 1ex) * var(--rows));
-  min-width: calc((v.$padding * 2 + 2ex) * var(--cols));
+  min-height: calc((v.$padding * 2 + 15px) * var(--rows));
+  min-width: calc(6ch * var(--cols));
   margin: 0;
   padding: 1ex;
-  box-sizing: border-box;
+  box-sizing:content-box;
   display: grid;
   grid-auto-flow: row;
-  grid-template-rows: repeat(attr(data-rows), 1fr);
-  grid-template-columns: repeat(attr(data-cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+  grid-template-columns: repeat(var(--cols), 6ch);
   list-style: none;
   font: list.slash(v.$font-size, v.$font-size) v.$font-monospace;
   position: relative;
 
   li {
-    padding: v.$padding;
+    padding-top: v.$padding;
+    padding-bottom: v.$padding;
+    padding-left: 0.5ch;
+    padding-right: 0.5ch;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   &::before, &::after {
@@ -342,10 +397,6 @@ body {
     align-items: center;
     align-content: flex-start;
     flex-wrap: wrap;
-
-    #orbitals li:not([data-name="hide all"]):not([data-name="show all"]):not(.showing) {
-      color: lighten(v.$color-text, 50%);
-    }
   }
 
   .wrapper {

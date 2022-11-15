@@ -19,34 +19,44 @@
   }
 
   &.toggle {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-
-    &::after {
-      content: "/";
-      padding: 0px v.$padding;
-      order: 2;
-    }
-
-    .toggle_on {
-      order: 1;
-      color: v.$color-text;
-    }
-
-    .toggle_off {
-      order: 3;
+    &:not(:has(.toggle_on)) {
       color: lighten(v.$color-text, 50%);
+
+      &.selected {
+        color: v.$color-text;
+      }
     }
 
-    &.selected {
+    &:has(.toggle_on) {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+
+      &::after {
+        content: "/";
+        padding: 0px v.$padding;
+        order: 2;
+      }
+
       .toggle_on {
-        color: lighten(v.$color-text, 50%);
+        order: 1;
+        color: v.$color-text;
       }
 
       .toggle_off {
-        color: v.$color-text;
+        order: 3;
+        color: lighten(v.$color-text, 50%);
+      }
+
+      &.selected {
+        .toggle_on {
+          color: lighten(v.$color-text, 50%);
+        }
+
+        .toggle_off {
+          color: v.$color-text;
+        }
       }
     }
   }

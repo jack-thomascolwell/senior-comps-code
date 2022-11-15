@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="{% static 'aom/css/style.css' %}" type="text/css" />
 
 <div id="calculator" class="">
+  <div id="compute" class="button">&nbsp;compute&nbsp;</div>
   <div id="ligands" class="start">
     <h2 class="heading">Ligands</h2>
     <p class="description">Enter the positions and binding constants of each ligand.</p>
@@ -22,30 +23,13 @@
           {% endfor %}
         </ul>
       </label>
-      <div class="button" id="compute">compute</div>
     </div>
   </div>
   <div id="output">
     <h2 class="heading">Orbital Energies</h2>
-    <p class="description">Below are the .......</p>
-    <p class="description">Below are the .......</p>
-    <div class="controls">
-      <div class="button" id="sigma">&sigma;</div>
-      <label class="dropdown discrete" id="pi">
-        <div class="dropdown_button">&pi;</div>
-        <div class="dropdown_arrow"></div>
-        <ul class="dropdown_menu">
-          <li title="{{l.name}}">&pi;<span class="sub">x</span></li>
-          <li title="{{l.name}}">&pi;<span class="sub">y</span></li>
-        </ul>
-      </label>
-    </div>
-    <div id="graph">
-    </div>
-    <div id="matrix">
-      <ul class="matrix" style="--rows: 5; --cols: 5;">
-      </ul>
-    </div>
+    <p class="description">Below are the computed one-electron d-orbital energies.</p>
+    <p class="description">Use the <span class="monospace">&sigma;</span> and <span class="monospace">&pi;</span> buttons to toggle &sigma; and &pi; bonding effects. The <span class="monospace">export</span> button will export the matrices as a .csv file</p>
+    <div id="plot"></div>
   </div>
   <div id="visualizer" class="visualizer">
     <div id="visualizerWrapper" class="wrapper"></div>
@@ -60,6 +44,7 @@
 <script src="https://unpkg.com/three@0.145/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.145/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://kit.fontawesome.com/b70d47e2ee.js" crossorigin="anonymous"></script>
 
 <script type="module" src="{% static 'aom/dropdown.js' %}" defer></script>
 <script type="module" src="{% static 'aom/button.js' %}" defer></script>

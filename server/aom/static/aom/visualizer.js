@@ -1,6 +1,7 @@
 'use strict'
 import orbitalPositions from './orbitals.json' assert {type: 'json'};
 import addDropdownCallbacks from './dropdown.js';
+import addToggleCallbacks from './button.js';
 
 export default class Visualizer {
   #ligands = [];
@@ -8,6 +9,7 @@ export default class Visualizer {
   #orbitals;
   #bonds = true;
   #axesLabel;
+  #controlsElement;
 
   static #ligandColor = new THREE.Color(0x808080);
   static #orbitalColor = new THREE.Color(0x303050);
@@ -29,10 +31,11 @@ export default class Visualizer {
 
   constructor(parent=document.body) {
     const wrapper = parent.getElementsByClassName('wrapper')[0];
-    const controlsElement = document.createElement('div');
+    this.#controlsElement = document.createElement('div');
+    const controlsElement = this.#controlsElement;
     controlsElement.classList.add('controls');
     controlsElement.innerHTML = `
-      <div class="button bonds">Bonds</div>
+      <div class="button toggle selected bonds">Bonds</div>
       <label class="dropdown persist orbitals">
         <div class="dropdown_button">d-Orbitals</div>
         <div class="dropdown_arrow"></div>
@@ -40,14 +43,14 @@ export default class Visualizer {
           <li data-name="show all">show all</li>
           <li data-name="hide all">hide all</li>
           <li class="dropdown__divider"></li>
-          <li data-name="dz2">dz<span class="super">2</span></li>
-          <li data-name="dx2-y2">dx<span class="super">2</span>-y<span class="super">2</span></li>
-          <li data-name="dxz">dxz</li>
-          <li data-name="dyz">dyz</li>
-          <li data-name="dxy">dxy</li>
+          <li class="toggle" data-name="dz2">dz<span class="super">2</span></li>
+          <li class="toggle" data-name="dx2-y2">dx<span class="super">2</span>-y<span class="super">2</span></li>
+          <li class="toggle" data-name="dxz">dxz</li>
+          <li class="toggle" data-name="dyz">dyz</li>
+          <li class="toggle" data-name="dxy">dxy</li>
         </ul>
       </label>
-      <div class="button axes">Axes</div>
+      <div class="button toggle selected axes">Axes</div>
       <label class="dropdown view">
         <div class="dropdown_button">View</div>
         <div class="dropdown_arrow"></div>
@@ -60,8 +63,9 @@ export default class Visualizer {
           <li data-view="[0,1,0]" title="xy">xy</li>
         </ul>
       </label>
-      <div class="button rotate">Rotate</div>`;
+      <div class="button toggle selected rotate">Rotate</div>`;
 
+    addToggleCallbacks(controlsElement);
     addDropdownCallbacks(controlsElement);
 
     Array.from(controlsElement.getElementsByClassName('orbitals')[0].getElementsByTagName('li')).forEach(li => {
@@ -69,6 +73,9 @@ export default class Visualizer {
       if (name == 'show all') {
         li.addEventListener('click', e=> {
           this.showOrbital('');
+          Array.from(controlsElement.getElementsByClassName('orbitals')[0].getElementsByTagName('li')).forEach(x => {
+            x.classList.add('selected');
+          });
         });
         return;
       }
@@ -76,6 +83,9 @@ export default class Visualizer {
       if (name == 'hide all') {
         li.addEventListener('click', e=> {
           this.hideOrbital('');
+          Array.from(controlsElement.getElementsByClassName('orbitals')[0].getElementsByTagName('li')).forEach(x => {
+            x.classList.remove('selected');
+          });
         });
         return;
       }
@@ -84,9 +94,11 @@ export default class Visualizer {
         if (!li.classList.contains('showing')) {
           this.showOrbital(name);
           li.classList.add('showing');
+          li.classList.add('selected');
         } else {
           this.hideOrbital(name);
           li.classList.remove('showing');
+          li.classList.remove('selected');
         }
       });
     });
@@ -185,12 +197,14 @@ export default class Visualizer {
   }
 
   set bonds(bonds) {
-    this.#bonds = Boolean(bonds);
+    bonds = Boolean(bonds)
+    this.#bonds = bonds;
     this.#ligands.forEach(l => {
       l.children.forEach(m => {
         if (m.name == 'bond') m.visible = this.#bonds;
       });
     });
+    this.#controlsElement.getElementsByClassName('bonds')[0].classList.toggle('selected', bonds);
   }
 
   get bonds() {
@@ -213,9 +227,11 @@ export default class Visualizer {
   }
 
   set showAxes(show) {
+    show = Boolean(show);
     if(show) this.#axesLabel.classList.remove('hidden');
     else this.#axesLabel.classList.add('hidden');
     this.axesHelper.visible = show;
+    this.#controlsElement.getElementsByClassName('axes')[0].classList.toggle('selected', show);
   }
 
   get showAxes() {
@@ -223,7 +239,9 @@ export default class Visualizer {
   }
 
   set autoRotate(autoRotate) {
+    autoRotate = Boolean(autoRotate);
     this.controls.autoRotate = autoRotate;
+    this.#controlsElement.getElementsByClassName('rotate')[0].classList.toggle('selected', autoRotate);
   }
 
   get autoRotate() {

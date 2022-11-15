@@ -50,9 +50,10 @@ def compute(request):
     sigmaEnergies = np.zeros((steps,5))
     piEnergies = np.zeros((steps,5))
     for x in range(steps):
-        position = (start['position'] * (steps - x)/steps) + (end['position'] * x / steps)
-        esigma = (start['esigma'] * (steps - x)/steps) + (end['esigma'] * x / steps)
-        epi = (start['epi'] * (steps - x)/steps) + (end['epi'] * x / steps)
+        f = (steps - x - 1)/(steps - 1);
+        position = (start['position'] * f) + (end['position'] * (1-f))
+        esigma = (start['esigma'] * f) + (end['esigma'] * (1-f))
+        epi = (start['epi'] * f) + (end['epi'] * (1-f))
 
         logger.debug(f"x={x}/{steps}")
         logger.debug(f"positions={position}")
@@ -75,6 +76,7 @@ def compute(request):
     piEnergies_str = aom.calculations.json(piEnergies)
 
     return JsonResponse({
+        'steps': steps,
         'sigmaMatrices': sigmaMatrices_str,
         'piMatrices': piMatrices_str,
         'energies': energies_str,

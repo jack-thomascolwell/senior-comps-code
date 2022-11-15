@@ -120,5 +120,5 @@ def pi(ligands, energies=[]):
 def json(mat):
     s = np.array2string(mat,separator=', ')
     s = re.sub(r'\n', '', s)
-    s = re.sub(r'\.(?=[,\]])', '', s)
+    s = re.sub(r'(\.\s*)(?=[,\]])', '', s)
     return s

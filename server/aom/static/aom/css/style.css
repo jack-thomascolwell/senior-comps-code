@@ -88,6 +88,12 @@
   padding: 0;
   border-bottom: 1px solid #cccccc;
 }
+.dropdown .dropdown_menu li.toggle {
+  color: #a1a1a1;
+}
+.dropdown .dropdown_menu li.toggle.selected {
+  color: #212121;
+}
 .dropdown.expanded {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -115,29 +121,35 @@
 .button:hover {
   background-color: #f2f2f2;
 }
-.button.toggle {
+.button.toggle:not(:has(.toggle_on)) {
+  color: #a1a1a1;
+}
+.button.toggle:not(:has(.toggle_on)).selected {
+  color: #212121;
+}
+.button.toggle:has(.toggle_on) {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
 }
-.button.toggle::after {
+.button.toggle:has(.toggle_on)::after {
   content: "/";
   padding: 0px 5px;
   order: 2;
 }
-.button.toggle .toggle_on {
+.button.toggle:has(.toggle_on) .toggle_on {
   order: 1;
   color: #212121;
 }
-.button.toggle .toggle_off {
+.button.toggle:has(.toggle_on) .toggle_off {
   order: 3;
   color: #a1a1a1;
 }
-.button.toggle.selected .toggle_on {
+.button.toggle:has(.toggle_on).selected .toggle_on {
   color: #a1a1a1;
 }
-.button.toggle.selected .toggle_off {
+.button.toggle:has(.toggle_on).selected .toggle_off {
   color: #212121;
 }
 
@@ -221,12 +233,18 @@ body {
   display: grid;
   box-sizing: border-box;
   padding: 15px;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, auto);
   grid-column-gap: 15px;
-  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
-  grid-template-areas: "display visualizer";
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+  grid-template-areas: "display visualizer" "display button";
   width: 100vw;
   height: 100vh;
+}
+#calculator #compute {
+  content: " compute ";
+  grid-area: button;
+  margin-left: auto;
+  margin-right: auto;
 }
 #calculator.output #ligands {
   display: none;
@@ -246,6 +264,8 @@ body {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 #calculator #ligands .heading, #calculator #output .heading {
   margin: 0;
@@ -292,15 +312,20 @@ body {
   flex-wrap: nowrap;
   width: 100%;
 }
-#calculator #ligands .ligand .delete {
-  font: 15px/15px sans-serif;
+#calculator #ligands .ligand .reset {
+  font-size: 15px;
+  line-height: 15px;
   margin-right: 5px;
-  font-weight: bold;
-  margin-left: auto;
   cursor: pointer;
 }
-#calculator #ligands .ligand .delete::after {
-  content: "X";
+#calculator #ligands .ligand .reset:hover {
+  color: #4caf50;
+}
+#calculator #ligands .ligand .delete {
+  font-size: 15px;
+  line-height: 15px;
+  margin-right: 5px;
+  cursor: pointer;
 }
 #calculator #ligands .ligand .delete:hover {
   color: #4caf50;
@@ -312,6 +337,7 @@ body {
   align-items: center;
   margin-left: 2em;
   width: 14em;
+  margin-right: auto;
 }
 #calculator #ligands .ligand .energies input {
   width: 6em;
@@ -322,11 +348,40 @@ body {
 #calculator #output {
   display: none;
 }
-#calculator #output #matrix {
-  margin-top: 15px;
+#calculator #output #plot {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  grid-template-areas: "controls" "plot" "matrix";
+  grid-row-gap: 15px;
 }
-#calculator #output #graph {
-  margin-top: 15px;
+#calculator #output #plot .controls {
+  grid-area: controls;
+}
+#calculator #output #plot .matrices {
+  grid-area: matrix;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+#calculator #output #plot .matrices .matrix:not(.tooltip) {
+  order: 1;
+}
+#calculator #output #plot .matrices .tooltip {
+  order: 3;
+}
+#calculator #output #plot .matrices .arrow {
+  order: 2;
+  font-size: 24px;
+  line-height: 24px;
+  text-align: center;
+  margin: 0 1ch;
+}
+#calculator #output #plot .wrapper {
+  grid-area: plot;
+  cursor: pointer;
 }
 
 .orderedPair {
@@ -379,21 +434,26 @@ body {
 .matrix {
   width: fit-content;
   height: fit-content;
-  min-height: calc((10px + 1ex) * var(--rows));
-  min-width: calc((10px + 2ex) * var(--cols));
+  min-height: calc(25px * var(--rows));
+  min-width: calc(6ch * var(--cols));
   margin: 0;
   padding: 1ex;
-  box-sizing: border-box;
+  box-sizing: content-box;
   display: grid;
   grid-auto-flow: row;
-  grid-template-rows: repeat(attr(data-rows), 1fr);
-  grid-template-columns: repeat(attr(data-cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+  grid-template-columns: repeat(var(--cols), 6ch);
   list-style: none;
   font: 15px / 15px monospace;
   position: relative;
 }
 .matrix li {
-  padding: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 0.5ch;
+  padding-right: 0.5ch;
+  width: 100%;
+  box-sizing: border-box;
 }
 .matrix::before, .matrix::after {
   content: " ";
@@ -432,9 +492,6 @@ body {
   align-items: center;
   align-content: flex-start;
   flex-wrap: wrap;
-}
-.visualizer .controls #orbitals li:not([data-name="hide all"]):not([data-name="show all"]):not(.showing) {
-  color: #a1a1a1;
 }
 .visualizer .wrapper {
   grid-area: canvas;

@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from aom.views import calculator
 
 urlpatterns = [
+    path('', calculator),
     path('aom/', include('aom.urls')),
     path('admin/', admin.site.urls),
 ]

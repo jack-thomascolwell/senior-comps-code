@@ -107,6 +107,13 @@
         padding: 0;
         border-bottom: v.$border;
       }
+
+      &.toggle {
+        color: lighten(v.$color-text, 50%);
+        &.selected {
+          color: v.$color-text;
+        }
+      }
     }
   }
 
