@@ -129,6 +129,11 @@ LOGGING = {
         },
     },
     'handlers': {
+        'heroku': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
@@ -144,12 +149,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers':['file','console'],
+            'handlers':['heroku','file','console'],
             'propagate': True,
             'level':'DEBUG',
         },
         'aom': {
-            'handlers': ['file','console'],
+            'handlers': ['heroku','file','console'],
             'level': 'DEBUG',
         },
     }
