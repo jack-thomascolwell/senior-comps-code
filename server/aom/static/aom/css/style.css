@@ -118,7 +118,11 @@
   padding: 0px 5px;
   text-transform: lowercase;
 }
-.button:hover {
+.button.disabled {
+  text-decoration: line-through;
+  cursor: default;
+}
+.button:not(.disabled):hover {
   background-color: #f2f2f2;
 }
 .button.toggle:not(:has(.toggle_on)) {

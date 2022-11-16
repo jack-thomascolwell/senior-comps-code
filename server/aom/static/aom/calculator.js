@@ -258,6 +258,9 @@ function updateLigands(f=-1) {
     else window.location.hash = '';
 
     visualizer.setLigands(ligands, selected);
+
+    // Disable compute button if no ligands
+    document.getElementById('compute').classList.toggle('disabled', request.start.length <= 0);
     return request;
   }
 }

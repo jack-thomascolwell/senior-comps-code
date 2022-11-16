@@ -14,7 +14,12 @@
   padding: 0px v.$padding;
   text-transform: lowercase;
 
-  &:hover {
+  &.disabled {
+    text-decoration: line-through;
+    cursor: default;
+  }
+
+  &:not(.disabled):hover {
     background-color: v.$color-bg-hover;
   }
 
