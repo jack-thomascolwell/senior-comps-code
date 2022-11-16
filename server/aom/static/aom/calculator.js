@@ -148,20 +148,14 @@ function updateLigands(f=-1) {
         zEnd = zStart;
       }
 
-      // Has end position but no start position => (missing values set to zero)
-      if (!hasPositionStart && hasPositionEnd) {
-        if (isNaN(xStart)) xStart = 0;
-        if (isNaN(yStart)) yStart = 0;
-        if (isNaN(zStart)) zStart = 0;
-      }
-
       if (hasPositionStart) {
         const start = new THREE.Vector3(xStart, yStart, zStart);
-        start.multiplyScalar(f);
+        start.normalize();
         const end = new THREE.Vector3(xEnd, yEnd, zEnd);
+        end.normalize();
+        start.multiplyScalar(f);
         end.multiplyScalar(1-f);
-        const pos = start.clone().add(end);
-        ligands.push(pos);
+        ligands.push(start.clone().add(end));
       }
     }
     visualizer.setLigands(ligands, -1);
