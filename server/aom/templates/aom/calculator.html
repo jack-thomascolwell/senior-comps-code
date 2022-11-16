@@ -9,7 +9,7 @@
   <div id="compute" class="button">&nbsp;compute&nbsp;</div>
   <div id="ligands" class="start">
     <h2 class="heading">Ligands</h2>
-    <p class="description">Enter the positions and binding constants of each ligand.</p>
+    <p class="description">Enter the positions and binding constants of each ligand or select preset ligands from the dropdown (shift click for citations).</p>
     <p class="description">To vary postions or binding constants, use the <span class="monospace">start/end</span> button. Note, you must enter the starting values first.</p>
     <p class="description">Once ready, use the <span class="monospace">compute</span> button to calculate the one-electron orbital energies.</p>
     <div class="controls">
@@ -22,7 +22,7 @@
         <div class="dropdown_arrow"></div>
         <ul class="dropdown_menu">
           {% for l in ligands %}
-          <li title="{{l.name}}" data-esigma="{{l.e_sigma}}" data-epi="{{l.e_pi}}">{{l.name}}</li>
+          <li title="{{l.name}}" data-citation="{{l.citation}}" data-esigma="{{l.e_sigma}}" data-epi="{{l.e_pi}}">{{l.name}}</li>
           {% endfor %}
         </ul>
       </label>

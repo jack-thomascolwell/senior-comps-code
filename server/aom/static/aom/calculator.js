@@ -377,10 +377,12 @@ parseFragment();
 Add controls to add new ligands
 */
 Array.from(document.querySelectorAll('#newLigand .dropdown_menu li:not(.dropdown__divider)')).forEach(li => {
-  const eSigma = li.dataset.esigma || '';
-  const ePi = li.dataset.epi || '';
-  li.addEventListener('click', e=> {
-    newLigand({start: {eSigma, ePi}, end: {eSigma, ePi}});
+  const eSigma = li.dataset.esigma ?? '';
+  const ePi = li.dataset.epi ?? '';
+  const citation = li.dataset.citation;
+  li.addEventListener('click', e => {
+    if (e.shiftKey && citation) window.open(citation, "");
+    else newLigand({start: {eSigma, ePi}, end: {eSigma, ePi}});
   });
 });
 
