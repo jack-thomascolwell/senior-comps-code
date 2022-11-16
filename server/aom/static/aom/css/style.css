@@ -376,6 +376,9 @@ body {
 #calculator #output #plot .matrices .tooltip {
   order: 3;
 }
+#calculator #output #plot .matrices .tooltip li {
+  color: var(--color);
+}
 #calculator #output #plot .matrices .arrow {
   order: 2;
   font-size: 24px;

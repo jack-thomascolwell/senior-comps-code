@@ -260,6 +260,9 @@ body {
 
         .tooltip {
           order: 3;
+          li {
+            color: var(--color);
+          }
         }
 
         .arrow {
