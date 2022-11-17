@@ -147,7 +147,6 @@ function updateLigands(f=-1) {
         yEnd = yStart;
         zEnd = zStart;
       }
-
       if (hasPositionStart) {
         const start = new THREE.Vector3(xStart, yStart, zStart);
         start.normalize();
@@ -155,7 +154,8 @@ function updateLigands(f=-1) {
         end.normalize();
         start.multiplyScalar(f);
         end.multiplyScalar(1-f);
-        ligands.push(start.clone().add(end));
+        const pos = start.clone().add(end);
+        ligands.push(pos);
       }
     }
     visualizer.setLigands(ligands, -1);

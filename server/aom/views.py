@@ -42,6 +42,10 @@ def compute(request):
         'epi': np.array(list(map(lambda l: l["epi"], end)))
     }
 
+    # Normalize vectors
+    start['position'] = np.array(list(map(lambda v: v/np.linalg.norm(v), start['position'])))
+    end['position'] = np.array(list(map(lambda v: v/np.linalg.norm(v), end['position'])))
+
     steps = 20
     energies = np.zeros((steps,5))
     sigmaMatrices = np.zeros((steps,5,5))
@@ -49,15 +53,10 @@ def compute(request):
     sigmaEnergies = np.zeros((steps,5))
     piEnergies = np.zeros((steps,5))
     for x in range(steps):
-        f = (steps - x - 1)/(steps - 1);
+        f = (steps - x - 1)/(steps - 1)
         position = (start['position'] * f) + (end['position'] * (1-f))
         esigma = (start['esigma'] * f) + (end['esigma'] * (1-f))
         epi = (start['epi'] * f) + (end['epi'] * (1-f))
-
-        logger.debug(f"x={x}/{steps}")
-        logger.debug(f"positions={position}")
-        logger.debug(f"esigma={esigma}")
-        logger.debug(f"epi={epi}")
 
         matSigma, energySigma = aom.calculations.sigma(position, esigma)
         matPi, energyPi = aom.calculations.pi(position, epi)

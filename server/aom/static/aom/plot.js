@@ -186,7 +186,9 @@ export default class Plot {
       }
     }
 
-    if(this.#hoverCB) this.#hoverCB((this.#data.steps + this.#lastIndex - 1) / (this.#data.steps - 1));
+    if(this.#hoverCB) {
+      this.#hoverCB(1 - (this.#lastIndex / (this.#data.steps - 1)));
+    }
 
     for (let i=0; i<5; i++) {
       const value = Plot.#format(this.#data.sigmaEnergies[this.#lastIndex][i] * this.#sigma + this.#data.piEnergies[this.#lastIndex][i] * this.#pi);
