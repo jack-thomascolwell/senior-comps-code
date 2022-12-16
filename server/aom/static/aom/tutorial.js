@@ -1,3 +1,7 @@
+/*
+Pagination functions for AOM tutorial and problem set
+*/
+
 (() => {
 const prev = document.getElementById('prev');
 const next = document.getElementById('next');

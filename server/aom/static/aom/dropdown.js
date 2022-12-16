@@ -1,3 +1,6 @@
+/*
+Helper file for dropdown menus
+*/
 function addDropdownCallbacks(parent) {
   Array.from(parent.getElementsByClassName('dropdown')).forEach(d => {
     const f = (e => {

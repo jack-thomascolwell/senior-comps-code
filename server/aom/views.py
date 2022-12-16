@@ -18,6 +18,7 @@ def calculator(request):
 def tutorial(request):
     return render(request, 'aom/tutorial.html', {})
 
+# Computes the AOM matrices and returns them as a JSON
 def compute(request):
     def parse(str):
         match = re.search(r'(?P<x>-?\d+\.?\d*),(?P<y>-?\d+\.?\d*),(?P<z>-?\d+\.?\d*),(?P<esigma>-?\d+\.?\d*),(?P<epi>-?\d+\.?\d*)',str)

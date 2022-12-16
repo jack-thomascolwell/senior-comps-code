@@ -1,3 +1,7 @@
+/*
+Class to handle interactive plot with computed orbital energies
+*/
+
 import addToggleCallbacks from './button.js';
 
 export default class Plot {
@@ -13,10 +17,19 @@ export default class Plot {
   #controlsElement;
   #lastIndex = 0;
 
+  /*
+  Formats numbers to set number of decimal places
+  */
   static #format(x, precision=2) {
     return Math.round(x * 10**precision) / (10**precision);
   }
 
+  /*
+  Constructor for plot
+  @param data The computed AOM data
+  @param parent The parent element to contain the output
+  @param hoverCB A callback to be called when the plot is hovered on
+  */
   constructor(data, parent=document.body, hoverCB=null) {
     const wrapper = document.createElement('div');
     wrapper.classList.add('wrapper');
@@ -148,6 +161,9 @@ export default class Plot {
     parent.appendChild(wrapper);
   }
 
+  /*
+  Determines if sigma effects are shown
+  */
   set sigma(sigma) {
     sigma = Boolean(sigma)
     this.#sigma = sigma;
@@ -159,6 +175,9 @@ export default class Plot {
     return this.#sigma;
   }
 
+  /*
+  Determines if pi effects are shown
+  */
   set pi(pi) {
     pi = Boolean(pi)
     this.#pi = pi;
@@ -170,11 +189,18 @@ export default class Plot {
     return this.#pi;
   }
 
+  /*
+  Updates data with new AOM results
+  */
   set data(data) {
     this.#data = data;
     this.#update(true);
   }
 
+  /*
+  Updates the plot
+  @param updateData Was the AOM data updated?
+  */
   #update(updateData) {
     this.#matrixElement.innerHTML = '';
     for (let c=0; c<5; c++) {
@@ -207,6 +233,9 @@ export default class Plot {
     }
   }
 
+  /*
+  Generates a CSV file from the AOM data and prompts the user to save it
+  */
   #csv() {
     const rows = [['reaction coordinate',
     'esigma_1', 'esigma_2', 'esigma_3', 'esigma_4', 'esigma_5',

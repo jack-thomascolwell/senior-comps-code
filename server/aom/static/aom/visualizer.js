@@ -3,6 +3,10 @@ import orbitalPositions from '/static/aom/orbitals.json' assert {type: 'json'};
 import addDropdownCallbacks from './dropdown.js';
 import addToggleCallbacks from './button.js';
 
+/*
+Helper class for molecule visualizer
+*/
+
 export default class Visualizer {
   #ligands = [];
   #animationFrame;
@@ -23,12 +27,19 @@ export default class Visualizer {
   static #ligandRadius = 0.125;
   static #bondRadius = 0.125/4;
 
+  /*
+  Generates a bond color that is slightly lighter than the molecule color
+  */
   static #bondColor(color=Visualizer.#ligandColor) {
     const newColor = color.clone();
     newColor.offsetHSL(0,0,0.25);
     return newColor;
   }
 
+  /*
+  Constructor for visualizer
+  @param parent The parent element for the visualizer
+  */
   constructor(parent=document.body) {
     const wrapper = parent.getElementsByClassName('wrapper')[0];
     this.#controlsElement = document.createElement('div');
@@ -68,6 +79,7 @@ export default class Visualizer {
     addToggleCallbacks(controlsElement);
     addDropdownCallbacks(controlsElement);
 
+    // Orbital controls
     Array.from(controlsElement.getElementsByClassName('orbitals')[0].getElementsByTagName('li')).forEach(li => {
       const name = li.dataset.name;
       if (name == 'show all') {
@@ -103,14 +115,17 @@ export default class Visualizer {
       });
     });
 
+    // Controls to toggle axes
     controlsElement.getElementsByClassName('axes')[0].addEventListener('click', e=> {
       this.showAxes = !visualizer.showAxes;
     });
 
+    // Controls to toggle bonds
     controlsElement.getElementsByClassName('bonds')[0].addEventListener('click', e=> {
       visualizer.bonds = !visualizer.bonds;
     });
 
+    // Controls to select viewpoint
     Array.from(controlsElement.querySelectorAll('.view .dropdown_menu li:not(.dropdown__divider)')).forEach(li => {
       const [x,y,z] = JSON.parse(li.dataset.view || "[1,1,1]");
       const position = new THREE.Vector3(x,y,z);
@@ -123,11 +138,13 @@ export default class Visualizer {
       })
     });
 
+    // Controls to toggle rotation
     controlsElement.getElementsByClassName('rotate')[0].addEventListener('click', e=> {
       visualizer.autoRotate = !visualizer.autoRotate;
     });
     parent.appendChild(controlsElement);
 
+    // THREEjs setup
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(wrapper.getBoundingClientRect().width, wrapper.getBoundingClientRect().height);
     wrapper.appendChild(this.renderer.domElement);
@@ -153,6 +170,7 @@ export default class Visualizer {
     this.axesHelper.setColors(Visualizer.#axesColors['x'], Visualizer.#axesColors['y'], Visualizer.#axesColors['z']);
     this.scene.add(this.axesHelper);
 
+    // Load orbitals from JSON mesh
     this.#orbitals = new THREE.Group();
     const orbitalMaterial = new THREE.MeshLambertMaterial({color: Visualizer.#orbitalColor});;
     orbitalMaterial.transparent = true;
@@ -172,10 +190,7 @@ export default class Visualizer {
     });
     this.scene.add(this.#orbitals);
 
-    //TODO: remove before production
-    //window.orbitals = this.#orbitals;
-    window.visualizer = this;
-
+    // Resize canvas on window resize
     window.addEventListener('resize', e => {
       const autoRotate = this.autoRotate;
       const view = this.view;
@@ -196,6 +211,7 @@ export default class Visualizer {
     this.autoRotate = true;
   }
 
+  // Toggle bond visibility
   set bonds(bonds) {
     bonds = Boolean(bonds)
     this.#bonds = bonds;
@@ -211,6 +227,7 @@ export default class Visualizer {
     return this.#bonds;
   }
 
+  // Toggle animation
   set running(run) {
     if (run) {
       if (this.#animationFrame === undefined) this.animate();
@@ -226,6 +243,7 @@ export default class Visualizer {
     return (this.#animationFrame !== undefined);
   }
 
+  // Toggle axes visibility
   set showAxes(show) {
     show = Boolean(show);
     if(show) this.#axesLabel.classList.remove('hidden');
@@ -238,6 +256,7 @@ export default class Visualizer {
     return this.axesHelper.visible;
   }
 
+  // Toggle rotation
   set autoRotate(autoRotate) {
     autoRotate = Boolean(autoRotate);
     this.controls.autoRotate = autoRotate;
@@ -248,6 +267,7 @@ export default class Visualizer {
     return this.controls.autoRotate;
   }
 
+  // Set viewpoint
   set view(position) {
     // Calcualte correct camera distance
     const size = new THREE.Vector3();
@@ -269,6 +289,7 @@ export default class Visualizer {
     return this.camera.position.clone();
   }
 
+  // Generate geometries for a new ligand at a given position
   #createLigandMesh(position=new THREE.Vector3(0,1,0)) {
     position.normalize();
     const bondGeometry = new THREE.CapsuleGeometry(Visualizer.#bondRadius, 1, 12, 12);
@@ -293,6 +314,7 @@ export default class Visualizer {
     return group;
   }
 
+  // Update the ligands with the option to highlight one
   setLigands(ligands, selected=-1) {
     this.#ligands.forEach(l => {
       this.scene.remove(l);
@@ -312,18 +334,21 @@ export default class Visualizer {
     }
   }
 
+  // Show a given d-orbital mesh
   showOrbital(name) {
     this.#orbitals.children.forEach(o => {
       if (o.name == name || name === '') o.visible = true;
     });
   }
 
+  // Hide a given d-orbital mesh
   hideOrbital(name) {
     this.#orbitals.children.forEach(o => {
       if (o.name == name || name === '') o.visible = false;
     });
   }
 
+  // Animation loop
   animate() {
     this.#animationFrame = window.requestAnimationFrame(this.animate.bind(this));
     this.controls.update();
