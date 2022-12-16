@@ -6,7 +6,6 @@ import addToggleCallbacks from './button.js';
 /*
 Helper class for molecule visualizer
 */
-
 export default class Visualizer {
   #ligands = [];
   #animationFrame;
@@ -117,12 +116,12 @@ export default class Visualizer {
 
     // Controls to toggle axes
     controlsElement.getElementsByClassName('axes')[0].addEventListener('click', e=> {
-      this.showAxes = !visualizer.showAxes;
+      this.showAxes = !this.showAxes;
     });
 
     // Controls to toggle bonds
     controlsElement.getElementsByClassName('bonds')[0].addEventListener('click', e=> {
-      visualizer.bonds = !visualizer.bonds;
+      this.bonds = !this.bonds;
     });
 
     // Controls to select viewpoint
@@ -130,17 +129,17 @@ export default class Visualizer {
       const [x,y,z] = JSON.parse(li.dataset.view || "[1,1,1]");
       const position = new THREE.Vector3(x,y,z);
       if (li.dataset.reset === undefined) li.addEventListener('click', e=> {
-        visualizer.view = position;
+        this.view = position;
       });
       else li.addEventListener('click', e=> {
-        visualizer.view = position;
-        visualizer.autoRotate = true;
+        this.view = position;
+        this.autoRotate = true;
       })
     });
 
     // Controls to toggle rotation
     controlsElement.getElementsByClassName('rotate')[0].addEventListener('click', e=> {
-      visualizer.autoRotate = !visualizer.autoRotate;
+      this.autoRotate = !this.autoRotate;
     });
     parent.appendChild(controlsElement);
 
