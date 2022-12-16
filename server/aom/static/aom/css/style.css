@@ -117,6 +117,7 @@
   width: fit-content;
   padding: 0px 5px;
   text-transform: lowercase;
+  text-decoration: none;
 }
 .button.disabled {
   text-decoration: line-through;
@@ -512,6 +513,82 @@ body {
   user-select: none;
   font: 15px / 24px monospace;
   display: flex;
+}
+
+#tutorial {
+  box-sizing: border-box;
+  padding: 15px;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr;
+  grid-row-gap: 15px;
+  grid-template-areas: "page" "controls";
+}
+#tutorial #nav {
+  grid-area: controls;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+#tutorial #nav #back {
+  order: 1;
+  margin-right: auto;
+}
+#tutorial #nav #prev {
+  order: 2;
+  margin-right: 1ex;
+}
+#tutorial #nav #page {
+  order: 3;
+  font: monospace;
+  margin-right: 1ex;
+  user-select: none;
+}
+#tutorial #nav #next {
+  order: 4;
+}
+#tutorial .page {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  grid-area: page;
+  padding: 10px;
+  box-shadow: 0 14px 14px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  box-shadow: 0 14px 14px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+#tutorial .page:not(.active) {
+  visibility: hidden;
+}
+#tutorial .page h1 {
+  margin: 0;
+  margin-bottom: 5px;
+  font: 32px/40px sans-serif;
+}
+#tutorial .page p {
+  margin: 0;
+  font: 15px / 24px sans-serif;
+}
+#tutorial .page p:last-of-type {
+  margin-bottom: 24px;
+}
+#tutorial .page img {
+  width: 50%;
+}
+#tutorial .page .keyterm {
+  font-weight: bold;
+}
+#tutorial .page .mono {
+  font-family: monospace;
 }
 
 /*# sourceMappingURL=style.css.map */

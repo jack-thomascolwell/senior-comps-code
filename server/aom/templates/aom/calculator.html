@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="{% static 'aom/css/style.css' %}" type="text/css" />
 <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
 
-<title>AOM</title>
+<title>AOM: Calculator</title>
 
 <div id="calculator" class="">
   <div id="compute" class="button">&nbsp;compute&nbsp;</div>
@@ -12,6 +12,7 @@
     <p class="description">Enter the positions and binding constants of each ligand or select preset ligands from the dropdown (shift click for citations).</p>
     <p class="description">To vary postions or binding constants, use the <span class="monospace">start/end</span> button. Note, you must enter the starting values first.</p>
     <p class="description">Once ready, use the <span class="monospace">compute</span> button to calculate the one-electron orbital energies.</p>
+    <p class="description">A full tutorial and accompanying problem set can be found <a href="{% url 'aom:tutorial' %}">here</a>.</p>
     <div class="controls">
       <div class="button toggle" id="startEnd">
         <span class="toggle_on">start</span>

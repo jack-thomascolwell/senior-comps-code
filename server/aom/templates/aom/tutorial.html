@@ -1,0 +1,95 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'aom/css/style.css' %}" type="text/css" />
+<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+
+<title>AOM: Tutorial</title>
+
+<div id="tutorial">
+  <div id="nav">
+     <a class="button" id="back" href="{% url 'aom:calculator' %}">return to the calculator</a>
+     <a class="button" id="prev"><</a>
+     <div id="page">1/4</div>
+     <a class="button" id="next">></a>
+   </div>
+  <div class="page active">
+    <h1>The Angular Overlap Model (AOM)</h1>
+    <p>AOM simplifies the problem calculating one-electron orbital energies via two key assumptions:</p>
+    <ol>
+      <li>Ligand effects are additive</li>
+      <li>Ligand-metal overlap integrals can be factored into &sigma; and &pi; bonding parameters</li>
+    </ol>
+    <p>These assumptions vastly simplify the problem and allow for non-idealized geometries that <span class="keyterm">Ligand Field Theory</span> cannot compute</p>
+  </div>
+    <div class="page">
+      <h1>Underlying Calculations</h1>
+      <p>The two parameters in AOM are <span class="keyterm">e&sigma;</span> and <span class="keyterm">e&pi;</span>. These correspond to the <em>idealized</em> overlap where the ligand and orbital align perfectly.</p>
+      <p>Rotating the coordinate system to match the actual ligand position gives a transformation matrix that correspons to the <span class="keyterm">fraction of idealized overlap</span>.</p>
+      <img src="{% static 'aom/img/coordinateTransform.png' %}" alt="Coordinate transform"></img>
+      <p>Within the matrix, <span class="keyterm">on-diagonal</span> elements correspond to idealized geometries while <span class="keyterm">off-diagonal</span> elementes correspond to non-idealized geometries and orbital mixing. <span class="keyterm">Diagonalizing</span> creates a new set of d-orbitals and gives their one-electron energies.</p>
+      <img src="{% static 'aom/img/transformationMatrix.png' %}" alt="Transformation matrix"></img>
+    </div>
+
+    <div class="page">
+      <h1>Precautions</h1>
+      <p>AOM does not account for the <span class="keyterm">many-electron problem</span>. These energies are <span class="keyterm">one-electron</span> orbital energies.</p>
+      <p>The metal-ligand distance does not matter; only the angles are relevant. Metal-ligand distances are encoded into the <span class="keyterm">e&sigma;</span> and <span class="keyterm">e&pi;</span> parameters.</p>
+    </div>
+
+    <div class="page">
+      <h1>Using the Calculator</h1>
+      <p>First input the starting ligand positions and binding parameters. Preset ligands from the literature can be selected from the <span class="mono">new ligand</span> dropdown.</p>
+      <p>If desired, input the ending ligand positions and parameters via the <span class="mono">start/end</span> button.</p>
+      <p>Your molecule will be shown to the right. You can toggle the bonds, axes, and d-orbitals via the controls at the top.</p>
+      <p>Once ready, hit <span class="mono">compute</span>. Your energies will be plotted and shown in matrix form below.</p>
+      <p>All caculations are encoded in the URL. Simply bookmark the page to save/shave your calculation.</p>
+    </div>
+
+    <div class="page">
+      <h1>Problem Set: Introduction</h1>
+      <p>The following 5-part problem set will help to familiarize you with AOM and the calculator. By the end, you should be able to:</p>
+      <ul>
+        <li>Understand how AOM calculations are performed and what assumptions are being made</li>
+        <li>Conceptualize how specific ligands and ligand positions give rise to sigma and pi bonding in transition metal complexes</li>
+        <li>Use AOM to generate quantitative splitting diagrams for transition metal complexes</li>
+      </ul>
+    </div>
+
+    <div class="page">
+      <h1>Problem Set: Basic Understanding</h1>
+      <p>Compute a metal complex with one ligand placing it along each axis. How do the sigma matrices change with a change in ligand position? What happens to the eigenvalues?</p>
+
+      <p>Compute a ligand going from (1,0,0) to (2,0,0). How do the matrices and eigenvalues change?</p>
+
+      <p>Compute a ligand going from the z-axis to an off-axis position. How do the matrices and eigenvalues change?</p>
+
+      <p>Compute a ML2 complex with both ligands along the &plusmn;x, &plusmn;y, and &plusmn;z axes. Recognizing that the simga energies are equivalent to the crystal-field splitting parameter, construct a qualitative d-orbital splitting diagram for a linear ML2 complex.
+
+      <p>The model is useful for moving from one geometry to another. Compute the transition from a square planar complex to a tetrahedron. What is the result?</p>
+
+    </div>
+
+    <div class="page">
+      <h1>Problem Set: More Advanced Geometries</h1>
+      <p>Calculate a ML6 octahedral complex. What is the value of 10Dq in terms of e&sigma;?</p>
+
+      <p>Calculate a trans-ML2 complex with the ligands along &plusmn;z. Then calculate a ML4 square planar complex with the ligands in the xy plane. If you add this result to the previous ML2 result, you should get the result of (1).  Now calculate the qualitative crystal-field splitting diagram for a trans-MA2B4 complex.  What do the orbital energies look like if A is a stronger-field ligand than B (calculate the energies assuming e&sigma; for A is 1.5e&sigma; for B).  Repeat for cis-MA2B4.</p>
+
+      <p>Calculate a tetrahedral molecule. Arrange the ligands to place the z axis of the M atom so as to bisect the L1-M-L2 angle. Hint: A tetrahedral has ligands at 4 of the 8 corners of a cube.  What are the energies of the sigma matrices?  Construct a qualitative d-orbital splitting diagram.</p>
+
+      <p>Calculate an Oh molecule with the threefold axis along z. The trick here is to put the ligands at the correct coordinates. Do the energy levels of the Oh molecule depend on how the z axis is oriented with respect to the M-L bonds?  Do you think this is a general result for all molecules?  Go back and recalculate a tetrahedral molecule with the z-axis aligned with one of the three-fold rotational axes.  Do you get the same d-orbital energies?</p>
+
+      <p>Calculate the d-orbital energies for a trigonal prismatic geometry.</p>
+
+      <p>Calculate the d-orbital energies for a square-pyramidal geometry and for a trigonal bipyramidal geometry.</p>
+    </div>
+
+    <div class="page">
+      <h1>Problem Set: Pi Effects</h1>
+      <p>Compute the pi matrices for each position in a standard octahedron. How does each position change the orbital energies? Make sure to use the orbital visualizer and imagine a px/py orbital at the ligand position.</p>
+
+      <p>Compute ferrocyanide, hexaaquairon(II), and hexabromoiron(II). Use the results to generate a qualitative splitting diagram for pi-donating, sigma-only, and pi-accepting complexes.</p>
+    </div>
+</div>
+
+<script src="{% static 'aom/tutorial.js' %}" type="text/javascript"></script>

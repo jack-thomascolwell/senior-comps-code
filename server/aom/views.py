@@ -15,10 +15,8 @@ def calculator(request):
     context = { 'ligands': ligands }
     return render(request, 'aom/calculator.html', context)
 
-def index(request):
-    ligands = Ligand.objects.order_by('name')
-    context = { 'ligands': ligands }
-    return render(request, 'aom/index.html', context)
+def tutorial(request):
+    return render(request, 'aom/tutorial.html', {})
 
 def compute(request):
     def parse(str):

@@ -13,6 +13,7 @@
   width: fit-content;
   padding: 0px v.$padding;
   text-transform: lowercase;
+  text-decoration: none;
 
   &.disabled {
     text-decoration: line-through;
